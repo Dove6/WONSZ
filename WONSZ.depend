@@ -1,0 +1,75 @@
+# depslib dependency file v1.0
+1463238018 source:h:\zzz soft zzz\programowanie\wonsz\cpp_windows\main.cpp
+	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
+	<SFML/Window.hpp>
+	<SFML/System.hpp>
+	<fstream>
+	<windows.h>
+	<cstdio>
+	<string>
+	<sstream>
+	<cstdlib>
+	<iostream>
+	<conio.h>
+	<ctime>
+	<iomanip>
+
+1463233712 source:h:\zzz soft zzz\programowanie\wonsz\cpp_windows\resource.rc
+
+1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv5.4\src\resource.rc
+
+1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv5.5\src\resource.rc
+
+1466535928 source:g:\zzz soft zzz\programowanie\wonsz\wonszv5.5\src\main.cpp
+	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
+	<SFML/Window.hpp>
+	<SFML/System.hpp>
+	<fstream>
+	<windows.h>
+	<cstdio>
+	<string>
+	<sstream>
+	<cstdlib>
+	<iostream>
+	<conio.h>
+	<ctime>
+	<iomanip>
+
+1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv5.5_mltplr\src\resource.rc
+
+1467229908 source:g:\zzz soft zzz\programowanie\wonsz\wonszv5.5_mltplr\src\main.cpp
+	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
+	<SFML/Window.hpp>
+	<SFML/System.hpp>
+	<fstream>
+	<windows.h>
+	<cstdio>
+	<string>
+	<sstream>
+	<cstdlib>
+	<iostream>
+	<conio.h>
+	<ctime>
+	<iomanip>
+
+1467230122 source:g:\zzz soft zzz\programowanie\wonsz\wonszv6.0\src\main.cpp
+	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
+	<SFML/Window.hpp>
+	<SFML/System.hpp>
+	<fstream>
+	<windows.h>
+	<cstdio>
+	<string>
+	<sstream>
+	<cstdlib>
+	<iostream>
+	<conio.h>
+	<ctime>
+	<iomanip>
+
+1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv6.0\src\resource.rc
+
