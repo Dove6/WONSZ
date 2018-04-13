@@ -73,3 +73,21 @@
 
 1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv6.0\src\resource.rc
 
+1523634224 source:e:\programowanie\wonsz\main.cpp
+	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
+	<SFML/Window.hpp>
+	<SFML/System.hpp>
+	<fstream>
+	<windows.h>
+	<cstdio>
+	<string>
+	<sstream>
+	<cstdlib>
+	<iostream>
+	<conio.h>
+	<ctime>
+	<iomanip>
+
+1523634224 source:e:\programowanie\wonsz\resource.rc
+
