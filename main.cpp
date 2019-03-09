@@ -9,7 +9,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
-#include <conio.h>
 #include <ctime>
 #include <iomanip>
 
@@ -373,7 +372,7 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     for (int l=0; l<6; l++)
         {le[l].setFont(font);
         le[l].setCharacterSize(120);
-        le[l].setColor(sf::Color(255, 255, 255, 180));
+        le[l].setFillColor(sf::Color(255, 255, 255, 180));
         }
     le[0].setString("1");
     le[0].setPosition(70, 25);
@@ -390,12 +389,12 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
 
     gr[0].setFont(font);
     gr[0].setCharacterSize(20);
-    gr[0].setColor(sf::Color(255, 255, 255, 180));
+    gr[0].setFillColor(sf::Color(255, 255, 255, 180));
     gr[0].setString("GRACZ");
     for (int k=1; k<6; k++)
         {gr[k].setFont(font);
         gr[k].setCharacterSize(20);
-        gr[k].setColor(sf::Color(255, 255, 255, 180));
+        gr[k].setFillColor(sf::Color(255, 255, 255, 180));
         gr[k].setString("GRACZY");
         }
     gr[0].setPosition(65, 155);
@@ -454,52 +453,52 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
             break;
 
         if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-            {le[0].setColor(sf::Color(255, 255, 255));
-            gr[0].setColor(sf::Color(255, 255, 255));
+            {le[0].setFillColor(sf::Color(255, 255, 255));
+            gr[0].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[0].setColor(sf::Color(255, 255, 255, 180));
-            gr[0].setColor(sf::Color(255, 255, 255, 180));
+            {le[0].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[0].setFillColor(sf::Color(255, 255, 255, 180));
             }
         if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-            {le[1].setColor(sf::Color(255, 255, 255));
-            gr[1].setColor(sf::Color(255, 255, 255));
+            {le[1].setFillColor(sf::Color(255, 255, 255));
+            gr[1].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[1].setColor(sf::Color(255, 255, 255, 180));
-            gr[1].setColor(sf::Color(255, 255, 255, 180));
+            {le[1].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[1].setFillColor(sf::Color(255, 255, 255, 180));
             }
         if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-            {le[2].setColor(sf::Color(255, 255, 255));
-            gr[2].setColor(sf::Color(255, 255, 255));
+            {le[2].setFillColor(sf::Color(255, 255, 255));
+            gr[2].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[2].setColor(sf::Color(255, 255, 255, 180));
-            gr[2].setColor(sf::Color(255, 255, 255, 180));
+            {le[2].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[2].setFillColor(sf::Color(255, 255, 255, 180));
             }
         if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-            {le[3].setColor(sf::Color(255, 255, 255));
-            gr[3].setColor(sf::Color(255, 255, 255));
+            {le[3].setFillColor(sf::Color(255, 255, 255));
+            gr[3].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[3].setColor(sf::Color(255, 255, 255, 180));
-            gr[3].setColor(sf::Color(255, 255, 255, 180));
+            {le[3].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[3].setFillColor(sf::Color(255, 255, 255, 180));
             }
         if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-            {le[4].setColor(sf::Color(255, 255, 255));
-            gr[4].setColor(sf::Color(255, 255, 255));
+            {le[4].setFillColor(sf::Color(255, 255, 255));
+            gr[4].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[4].setColor(sf::Color(255, 255, 255, 180));
-            gr[4].setColor(sf::Color(255, 255, 255, 180));
+            {le[4].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[4].setFillColor(sf::Color(255, 255, 255, 180));
             }
         if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-            {le[5].setColor(sf::Color(255, 255, 255));
-            gr[5].setColor(sf::Color(255, 255, 255));
+            {le[5].setFillColor(sf::Color(255, 255, 255));
+            gr[5].setFillColor(sf::Color(255, 255, 255));
             }
         else
-            {le[5].setColor(sf::Color(255, 255, 255, 180));
-            gr[5].setColor(sf::Color(255, 255, 255, 180));
+            {le[5].setFillColor(sf::Color(255, 255, 255, 180));
+            gr[5].setFillColor(sf::Color(255, 255, 255, 180));
             }
 
         WONSZ.clear(sf::Color(0, 0, 0));
@@ -557,8 +556,8 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
         okr[p].setFont(font);
         wyniktext[p].setCharacterSize(12);
         okr[p].setCharacterSize(12);
-        wyniktext[p].setColor(sf::Color(255, 255, 255, 180));
-        okr[p].setColor(sf::Color(255, 255, 255, 180));
+        wyniktext[p].setFillColor(sf::Color(255, 255, 255, 180));
+        okr[p].setFillColor(sf::Color(255, 255, 255, 180));
         }
     switch (players)
         {case 1: wyniktext[0].setPosition(244, 399);
@@ -615,7 +614,7 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
 
     sf::Text mniamtext("", font);
     mniamtext.setCharacterSize(12);
-    mniamtext.setColor(sf::Color(255, 255, 255, 180));
+    mniamtext.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::SoundBuffer krokbuffer;
 	krokbuffer.loadFromFile("./Data/krok.wav");
@@ -911,7 +910,7 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     sf::Text nicktext("", font);
     nicktext.setPosition(310, 189);
     nicktext.setCharacterSize(12);
-    nicktext.setColor(sf::Color(255, 255, 255, 180));
+    nicktext.setFillColor(sf::Color(255, 255, 255, 180));
     int hajskor[10];
     string nejm[10];
     fstream plik;
@@ -1272,12 +1271,12 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
     sf::Text opcja1(dzwiek01, font);
     opcja1.setPosition(112, 142);
     opcja1.setCharacterSize(12);
-    opcja1.setColor(sf::Color(255, 255, 255, 180));
+    opcja1.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text opcja2(szybk, font);
     opcja2.setPosition(336, 190);
     opcja2.setCharacterSize(12);
-    opcja2.setColor(sf::Color(255, 255, 255, 180));
+    opcja2.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Texture up0;
     up0.loadFromFile("./Data/up.png");
@@ -1308,7 +1307,7 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
     sf::Text opcja3("ODDZIELNE ZYCIA: "+odd_stan, font);
     opcja3.setPosition(205, 286);
     opcja3.setCharacterSize(12);
-    opcja3.setColor(sf::Color(255, 255, 255, 180));
+    opcja3.setFillColor(sf::Color(255, 255, 255, 180));
 
 	while (opcje_koniec==false)
         {WONSZ.clear(sf::Color(0, 0, 0));
@@ -1654,7 +1653,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text first(frst, font);
     first.setPosition(lenght[0], 132);
     first.setCharacterSize(12);
-    first.setColor(sf::Color(255, 255, 255, 180));
+    first.setFillColor(sf::Color(255, 255, 255, 180));
 
      sf::String scnd;
     if (hajskor[1]=="-1")
@@ -1667,7 +1666,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text second(scnd, font);
     second.setPosition(lenght[1], 156);
     second.setCharacterSize(12);
-    second.setColor(sf::Color(255, 255, 255, 180));
+    second.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String thrd;
     if (hajskor[2]=="-1")
@@ -1680,7 +1679,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text third(thrd, font);
     third.setPosition(lenght[2], 180);
     third.setCharacterSize(12);
-    third.setColor(sf::Color(255, 255, 255, 180));
+    third.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String frth;
     if (hajskor[3]=="-1")
@@ -1693,7 +1692,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text fourth(frth, font);
     fourth.setPosition(lenght[3], 204);
     fourth.setCharacterSize(12);
-    fourth.setColor(sf::Color(255, 255, 255, 180));
+    fourth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String ffth;
     if (hajskor[4]=="-1")
@@ -1706,7 +1705,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text fifth(ffth, font);
     fifth.setPosition(lenght[4], 228);
     fifth.setCharacterSize(12);
-    fifth.setColor(sf::Color(255, 255, 255, 180));
+    fifth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String sxth;
     if (hajskor[5]=="-1")
@@ -1719,7 +1718,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text sixth(sxth, font);
     sixth.setPosition(lenght[5], 252);
     sixth.setCharacterSize(12);
-    sixth.setColor(sf::Color(255, 255, 255, 180));
+    sixth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String svnth;
     if (hajskor[6]=="-1")
@@ -1732,7 +1731,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text seventh(svnth, font);
     seventh.setPosition(lenght[6], 276);
     seventh.setCharacterSize(12);
-    seventh.setColor(sf::Color(255, 255, 255, 180));
+    seventh.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String ghth;
     if (hajskor[7]=="-1")
@@ -1745,7 +1744,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text eighth(ghth, font);
     eighth.setPosition(lenght[7], 300);
     eighth.setCharacterSize(12);
-    eighth.setColor(sf::Color(255, 255, 255, 180));
+    eighth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String nnth;
     if (hajskor[8]=="-1")
@@ -1758,7 +1757,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text ninth(nnth, font);
     ninth.setPosition(lenght[8], 324);
     ninth.setCharacterSize(12);
-    ninth.setColor(sf::Color(255, 255, 255, 180));
+    ninth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String tnth;
     if (hajskor[9]=="-1")
@@ -1773,7 +1772,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sf::Text tenth(tnth, font);
     tenth.setPosition(lenght[9], 348);
     tenth.setCharacterSize(12);
-    tenth.setColor(sf::Color(255, 255, 255, 180));
+    tenth.setFillColor(sf::Color(255, 255, 255, 180));
 
     bool ranking_koniec=false, pauza=false;
 
@@ -1885,27 +1884,27 @@ int main()
     sf::Text przycisk1("GRA", font);
     przycisk1.setPosition(280, 190);
     przycisk1.setCharacterSize(12);
-    przycisk1.setColor(sf::Color(255, 255, 255, 180));
+    przycisk1.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text przycisk2("RANKING", font);
     przycisk2.setPosition(264, 226);
     przycisk2.setCharacterSize(12);
-    przycisk2.setColor(sf::Color(255, 255, 255, 180));
+    przycisk2.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text przycisk3("OPCJE", font);
     przycisk3.setPosition(272, 262);
     przycisk3.setCharacterSize(12);
-    przycisk3.setColor(sf::Color(255, 255, 255, 180));
+    przycisk3.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text przycisk4("POMOC", font);
     przycisk4.setPosition(272, 298);
     przycisk4.setCharacterSize(12);
-    przycisk4.setColor(sf::Color(255, 255, 255, 180));
+    przycisk4.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text przycisk5("WYJSCIE", font);
     przycisk5.setPosition(264, 334);
     przycisk5.setCharacterSize(12);
-    przycisk5.setColor(sf::Color(255, 255, 255, 180));
+    przycisk5.setFillColor(sf::Color(255, 255, 255, 180));
 
 	sf::Sound tlo;
 	tlo.setBuffer(tlobuffer);
@@ -2000,29 +1999,29 @@ int main()
 
         switch (place)
             {case 0: if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (180*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (210*pix_h/416))
-                    przycisk1.setColor(sf::Color(255, 255, 255));
+                    przycisk1.setFillColor(sf::Color(255, 255, 255));
                 else
-                    przycisk1.setColor(sf::Color(255, 255, 255, 180));
+                    przycisk1.setFillColor(sf::Color(255, 255, 255, 180));
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (215*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (245*pix_h/416))
-                    przycisk2.setColor(sf::Color(255, 255, 255));
+                    przycisk2.setFillColor(sf::Color(255, 255, 255));
                 else
-                    przycisk2.setColor(sf::Color(255, 255, 255, 180));
+                    przycisk2.setFillColor(sf::Color(255, 255, 255, 180));
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (255*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (285*pix_h/416))
-                    przycisk3.setColor(sf::Color(255, 255, 255));
+                    przycisk3.setFillColor(sf::Color(255, 255, 255));
                 else
-                    przycisk3.setColor(sf::Color(255, 255, 255, 180));
+                    przycisk3.setFillColor(sf::Color(255, 255, 255, 180));
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (290*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (320*pix_h/416))
-                    przycisk4.setColor(sf::Color(255, 255, 255));
+                    przycisk4.setFillColor(sf::Color(255, 255, 255));
                 else
-                    przycisk4.setColor(sf::Color(255, 255, 255, 180));
+                    przycisk4.setFillColor(sf::Color(255, 255, 255, 180));
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (325*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (355*pix_h/416))
-                    przycisk5.setColor(sf::Color(255, 255, 255));
+                    przycisk5.setFillColor(sf::Color(255, 255, 255));
                 else
-                    przycisk5.setColor(sf::Color(255, 255, 255, 180));
+                    przycisk5.setFillColor(sf::Color(255, 255, 255, 180));
 
                 WONSZ.clear(sf::Color(0, 0, 0));
                 WONSZ.draw(menusprite);
