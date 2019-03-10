@@ -11,27 +11,43 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
+#include <random>
 
 using namespace std;
 
-bool sound;
+/* refaktoryzacja */
+struct {
+    bool dzwiek,
+         dev,
+         pauza,
+         koniec;
+} flagi = {true, false, false, false};
+unsigned short plansza = 0;
+
+random_device rd;
+mt19937 maszyna_losujaca(rd());
+uniform_int_distribution<int> los_cyfra(1, 9);
+uniform_int_distribution<int> los_wysokosc(1, 31);
+uniform_int_distribution<int> los_szerokosc(1, 71);
+/* */
 
 sf::RenderWindow WONSZ(sf::VideoMode(584, 424, 32), "WONSZ");
 int pix_h, pix_w;
 sf::Vector2u pix_s;
 short players;
 
-void losu(unsigned char tab[73][33], unsigned char &mniam, unsigned char &x, unsigned char &y, sf::Text &mniamtext)
+void losu(unsigned char tab[73][33], unsigned char &mniam, sf::Text &mniamtext)
 {
-    mniam=rand()%9+49;
-    do
-        {x=rand()%71+1;
-        y=rand()%31+1;
-        }while(tab[x][y]!=32);
-    tab[x][y]=mniam;
-    mniamtext.setPosition(x*8, (y*12)-2);
-    switch (mniam)
-        {case 49: mniamtext.setString("1");
+    unsigned char x, y;
+    mniam = los_cyfra(maszyna_losujaca) + 48;
+    do {
+        x = los_szerokosc(maszyna_losujaca);
+        y = los_wysokosc(maszyna_losujaca);
+    } while (tab[x][y] != 32);
+    tab[x][y] = mniam;
+    mniamtext.setPosition(x * 8, (y * 12) - 2);
+    switch (mniam) {
+        case 49: mniamtext.setString("1");
             break;
         case 50: mniamtext.setString("2");
             break;
@@ -49,28 +65,30 @@ void losu(unsigned char tab[73][33], unsigned char &mniam, unsigned char &x, uns
             break;
         case 57: mniamtext.setString("9");
             break;
-        }
+    }
 }
 
-void poczatek(unsigned char tab[73][33], unsigned char &mniam, unsigned char &x, unsigned char &y, sf::Text &mniamtext)
+void poczatek(unsigned char tab[73][33], unsigned char &mniam, sf::Text &mniamtext)
 {
-    for (int i=0; i<33; i++)
-		for (int j=0; j<73; j++)
-			tab[j][i]=32;
-	for (int i=0; i<73; i++)
-		{tab[i][0]=205;
-		tab[i][32]=205;
+    for (int i = 0; i < 33; i++) {
+		for (int j = 0; j < 73; j++) {
+			tab[j][i] = 32;
 		}
-	for (int i=0; i<33; i++)
-		{tab[0][i]=186;
-		tab[72][i]=186;
-		}
-	tab[0][0]=201;
-	tab[0][32]=200;
-	tab[72][0]=187;
-	tab[72][32]=188;
+    }
+	for (int i = 0; i < 73; i++) {
+		tab[i][0] = 205;
+		tab[i][32] = 205;
+    }
+	for (int i = 0; i < 33; i++) {
+		tab[0][i] = 186;
+		tab[72][i] = 186;
+    }
+	tab[0][0] = 201;
+	tab[0][32] = 200;
+	tab[72][0] = 187;
+	tab[72][32] = 188;
 
-    losu(tab, mniam, x, y, mniamtext);
+    losu(tab, mniam, mniamtext);
 	WONSZ.display();
 }
 
@@ -84,266 +102,236 @@ void rysuj_basic(sf::Text mniamtext, sf::Sprite grasprite)
 void rysuj_once(int dlugosc, sf::Sprite &headsprite, sf::Sprite &bellysprite, sf::Sprite &tailsprite, sf::Text wyniktext, unsigned char poz[2201][2])
 {
 	WONSZ.draw(headsprite);
-	for (int i=2; i<dlugosc; i++)
-        {bellysprite.setPosition(poz[i-1][0]*8, poz[i-1][1]*12);
+	for (int i = 2; i < dlugosc; i++) {
+        bellysprite.setPosition(poz[i - 1][0] * 8, poz[i - 1][1] * 12);
         WONSZ.draw(bellysprite);
-        }
+    }
 	WONSZ.draw(wyniktext);
 	WONSZ.draw(tailsprite);
 }
 
-void ruch(short &raz, unsigned char &pozx, unsigned char &pozy, unsigned char tab[73][33], bool &koniec, unsigned char &mniam, unsigned char &x, unsigned char &y, int &d, int &dlugosc, unsigned char poz[2201][2], bool &zjadl, int glpdX, int glpdY, sf::Sprite &headsprite, sf::Sprite &bellysprite, sf::Sprite &tailsprite, sf::Text &mniamtext, int ID)
+void ruch(short &raz, unsigned char &pozx, unsigned char &pozy, unsigned char tab[73][33], bool &koniec, unsigned char &mniam, int &d, int &dlugosc, unsigned char poz[2201][2], bool &zjadl, int glpdX, int glpdY, sf::Sprite &headsprite, sf::Sprite &bellysprite, sf::Sprite &tailsprite, sf::Text &mniamtext, int ID)
 {
     short pla[6][2];
-    switch (players)
-        {case 1: pla[0][0]=36;///
-            pla[0][1]=16;
-            break;
-        case 2: pla[1][0]=24;///
-            pla[1][1]=16;
-            pla[0][0]=48;///
-            pla[0][1]=16;
-            break;
-        case 3: pla[1][0]=18;///
-            pla[1][1]=16;
-            pla[2][0]=36;///
-            pla[2][1]=16;
-            pla[0][0]=54;///
-            pla[0][1]=16;
-            break;
-        case 4: pla[1][0]=24;///
-            pla[1][1]=10;
-            pla[2][0]=48;///
-            pla[2][1]=10;
-            pla[3][0]=24;///
-            pla[3][1]=22;
-            pla[0][0]=48;///
-            pla[0][1]=22;
-            break;
-        case 5: pla[1][0]=18;///
-            pla[1][1]=8;
-            pla[2][0]=54;///
-            pla[2][1]=8;
-            pla[3][0]=36;///
-            pla[3][1]=16;
-            pla[0][0]=18;///
-            pla[0][1]=24;
-            pla[4][0]=54;///
-            pla[4][1]=24;
-            break;
-        case 6: pla[1][0]=18;///
-            pla[1][1]=10;
-            pla[2][0]=36;///
-            pla[2][1]=10;
-            pla[3][0]=54;///
-            pla[3][1]=10;
-            pla[0][0]=18;///
-            pla[0][1]=22;
-            pla[4][0]=36;///
-            pla[4][1]=22;
-            pla[5][0]=54;///
-            pla[5][1]=22;
+    switch (players) {
+        case 1: {
+            pla[0][0] = 36;///
+            pla[0][1] = 16;
             break;
         }
-
-    if (raz == 0)
-        {if (glpdY == -1)
-            {tab[(pla[ID][0])][(pla[ID][1])]='O';
-            poz[2][0]=pla[ID][0];
-            poz[2][1]=pla[ID][1];
-
-            tab[(pla[ID][0])][(pla[ID][1])+1]=254;
-            poz[1][0]=poz[2][0];
-            poz[1][1]=poz[2][1]+1;
-
-            tab[(pla[ID][0])][(pla[ID][1])+2]=4;
-            poz[0][0]=poz[1][0];
-            poz[0][1]=poz[1][1]+1;
-
-            }
-        if (glpdX == -1)
-            {tab[(pla[ID][0])][(pla[ID][1])]='O';
-            poz[2][0]=pla[ID][0];
-            poz[2][1]=pla[ID][1];
-
-            tab[(pla[ID][0])+1][(pla[ID][1])]=254;
-            poz[1][0]=poz[2][0]+1;
-            poz[1][1]=poz[2][1];
-
-            tab[(pla[ID][0])+2][(pla[ID][1])]=4;
-            poz[0][0]=poz[1][0]+1;
-            poz[0][1]=poz[1][1];
-
-            }
-        if (glpdX == 1)
-            {tab[(pla[ID][0])][(pla[ID][1])]='O';
-            poz[2][0]=pla[ID][0];
-            poz[2][1]=pla[ID][1];
-
-            tab[(pla[ID][0])-1][(pla[ID][1])]=254;
-            poz[1][0]=poz[2][0]-1;
-            poz[1][1]=poz[2][1];
-
-            tab[(pla[ID][0])-2][(pla[ID][1])]=4;
-            poz[0][0]=poz[1][0]-1;
-            poz[0][1]=poz[1][1];
-
-            }
-        if (glpdY == 1)
-            {tab[(pla[ID][0])][(pla[ID][1])]='O';
-            poz[2][0]=pla[ID][0];
-            poz[2][1]=pla[ID][1];
-
-            tab[(pla[ID][0])][(pla[ID][1])-1]=254;
-            poz[1][0]=poz[2][0];
-            poz[1][1]=poz[2][1]-1;
-
-            tab[(pla[ID][0])][(pla[ID][1])-2]=4;
-            poz[0][0]=poz[1][0];
-            poz[0][1]=poz[1][1]-1;
-
-            }
-        headsprite.setPosition(poz[2][0]*8, poz[2][1]*12);
-        tailsprite.setPosition(poz[0][0]*8, poz[0][1]*12);
+        case 2: {
+            pla[1][0] = 24;///
+            pla[1][1] = 16;
+            pla[0][0] = 48;///
+            pla[0][1] = 16;
+            break;
         }
-    else
-        {pozx=poz[dlugosc-1][0];
-        pozy=poz[dlugosc-1][1];
-        if (tab[pozx+glpdX][pozy+glpdY] == 186)
-            {koniec = true;
+        case 3: {
+            pla[1][0] = 18;///
+            pla[1][1] = 16;
+            pla[2][0] = 36;///
+            pla[2][1] = 16;
+            pla[0][0] = 54;///
+            pla[0][1] = 16;
+            break;
+        }
+        case 4: {
+            pla[1][0] = 24;///
+            pla[1][1] = 10;
+            pla[2][0] = 48;///
+            pla[2][1] = 10;
+            pla[3][0] = 24;///
+            pla[3][1] = 22;
+            pla[0][0] = 48;///
+            pla[0][1] = 22;
+            break;
+        }
+        case 5: {
+            pla[1][0] = 18;///
+            pla[1][1] = 8;
+            pla[2][0] = 54;///
+            pla[2][1] = 8;
+            pla[3][0] = 36;///
+            pla[3][1] = 16;
+            pla[0][0] = 18;///
+            pla[0][1] = 24;
+            pla[4][0] = 54;///
+            pla[4][1] = 24;
+            break;
+        }
+        case 6: {
+            pla[1][0] = 18;///
+            pla[1][1] = 10;
+            pla[2][0] = 36;///
+            pla[2][1] = 10;
+            pla[3][0] = 54;///
+            pla[3][1] = 10;
+            pla[0][0] = 18;///
+            pla[0][1] = 22;
+            pla[4][0] = 36;///
+            pla[4][1] = 22;
+            pla[5][0] = 54;///
+            pla[5][1] = 22;
+            break;
+        }
+    }
+
+    if (raz == 0) {
+        if (glpdY == -1) {
+            tab[(pla[ID][0])][(pla[ID][1])] = 'O';
+            poz[2][0] = pla[ID][0];
+            poz[2][1] = pla[ID][1];
+
+            tab[(pla[ID][0])][(pla[ID][1]) + 1] = 254;
+            poz[1][0] = poz[2][0];
+            poz[1][1] = poz[2][1] + 1;
+
+            tab[(pla[ID][0])][(pla[ID][1]) + 2] = 4;
+            poz[0][0] = poz[1][0];
+            poz[0][1] = poz[1][1] + 1;
+        }
+        if (glpdX == -1) {
+            tab[(pla[ID][0])][(pla[ID][1])] = 'O';
+            poz[2][0] = pla[ID][0];
+            poz[2][1] = pla[ID][1];
+
+            tab[(pla[ID][0]) + 1][(pla[ID][1])] = 254;
+            poz[1][0] = poz[2][0] + 1;
+            poz[1][1] = poz[2][1];
+
+            tab[(pla[ID][0]) + 2][(pla[ID][1])] = 4;
+            poz[0][0] = poz[1][0] + 1;
+            poz[0][1] = poz[1][1];
+        }
+        if (glpdX == 1) {
+            tab[(pla[ID][0])][(pla[ID][1])] = 'O';
+            poz[2][0] = pla[ID][0];
+            poz[2][1] = pla[ID][1];
+
+            tab[(pla[ID][0]) - 1][(pla[ID][1])] = 254;
+            poz[1][0] = poz[2][0] - 1;
+            poz[1][1] = poz[2][1];
+
+            tab[(pla[ID][0]) - 2][(pla[ID][1])] = 4;
+            poz[0][0] = poz[1][0] - 1;
+            poz[0][1] = poz[1][1];
+        }
+        if (glpdY == 1) {
+            tab[(pla[ID][0])][(pla[ID][1])] = 'O';
+            poz[2][0] = pla[ID][0];
+            poz[2][1] = pla[ID][1];
+
+            tab[(pla[ID][0])][(pla[ID][1]) - 1] = 254;
+            poz[1][0] = poz[2][0];
+            poz[1][1] = poz[2][1] - 1;
+
+            tab[(pla[ID][0])][(pla[ID][1]) - 2] = 4;
+            poz[0][0] = poz[1][0];
+            poz[0][1] = poz[1][1] - 1;
+        }
+        headsprite.setPosition(poz[2][0] * 8, poz[2][1] * 12);
+        tailsprite.setPosition(poz[0][0] * 8, poz[0][1] * 12);
+    } else {
+        pozx = poz[dlugosc - 1][0];
+        pozy = poz[dlugosc - 1][1];
+        if (tab[pozx + glpdX][pozy + glpdY] == 186) {
+            koniec = true;
             return;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 205)
-            {koniec = true;
+        }
+        if (tab[pozx + glpdX][pozy + glpdY] == 205) {
+            koniec = true;
             return;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 254)
-            {koniec = true;
+        }
+        if (tab[pozx + glpdX][pozy + glpdY] == 254) {
+            koniec = true;
             return;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 4 && d>0)
-            {koniec = true;
+        }
+        if (tab[pozx + glpdX][pozy + glpdY] == 4 && d > 0) {
+            koniec = true;
             return;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 49)
-            {losu(tab, mniam, x, y, mniamtext);
-            d++;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 50)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=2;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 51)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=3;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 52)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=4;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 53)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=5;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 54)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=6;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 55)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=7;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 56)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=8;
-            zjadl=true;
-            }
-        if (tab[pozx+glpdX][pozy+glpdY] == 57)
-            {losu(tab, mniam, x, y, mniamtext);
-            d+=9;
-            zjadl=true;
-            }
-        if (d>0)
-            {pozx=poz[dlugosc-1][0];
-            pozy=poz[dlugosc-1][1];
-            tab[pozx][pozy]=254;
-            tab[pozx+glpdX][pozy+glpdY]='O';
-            poz[dlugosc][0]=pozx+glpdX;
-            poz[dlugosc][1]=pozy+glpdY;
-            headsprite.setPosition((pozx+glpdX)*8, (pozy+glpdY)*12);
+        }
+        if (tab[pozx + glpdX][pozy + glpdY] >= 49 && tab[pozx + glpdX][pozy + glpdY] <= 57) {
+            losu(tab, mniam, mniamtext);
+            d += tab[pozx + glpdX][pozy + glpdY] - 48;
+            zjadl = true;
+        }
+        if (d > 0) {
+            pozx = poz[dlugosc - 1][0];
+            pozy = poz[dlugosc - 1][1];
+            tab[pozx][pozy] = 254;
+            tab[pozx + glpdX][pozy + glpdY] = 'O';
+            poz[dlugosc][0] = pozx + glpdX;
+            poz[dlugosc][1] = pozy + glpdY;
+            headsprite.setPosition((pozx + glpdX) * 8, (pozy + glpdY) * 12);
             d--;
             dlugosc++;
             return;
-            }
-        pozx=poz[0][0];
-        pozy=poz[0][1];
-        tab[pozx][pozy]=32;
-        for (int i=0; i<dlugosc-1; i++)
-            {poz[i][0]=poz[i+1][0];
-            poz[i][1]=poz[i+1][1];
-            }
-        pozx=poz[0][0];
-        pozy=poz[0][1];
-        tab[pozx][pozy]=4;
-        tailsprite.setPosition(pozx*8, pozy*12);
-        pozx=poz[dlugosc-1][0];
-        pozy=poz[dlugosc-1][1];
-        tab[pozx][pozy]=254;
-        pozx+=glpdX;
-        pozy+=glpdY;
-        tab[pozx][pozy]='O';
-        headsprite.setPosition(pozx*8, pozy*12);
-        poz[dlugosc-1][0]+=glpdX;
-        poz[dlugosc-1][1]+=glpdY;
         }
+        pozx = poz[0][0];
+        pozy = poz[0][1];
+        tab[pozx][pozy] = 32;
+        for (int i = 0; i < dlugosc - 1; i++) {
+            poz[i][0] = poz[i + 1][0];
+            poz[i][1] = poz[i + 1][1];
+        }
+        pozx = poz[0][0];
+        pozy = poz[0][1];
+        tab[pozx][pozy] = 4;
+        tailsprite.setPosition(pozx * 8, pozy * 12);
+        pozx=poz[dlugosc - 1][0];
+        pozy=poz[dlugosc - 1][1];
+        tab[pozx][pozy] = 254;
+        pozx += glpdX;
+        pozy += glpdY;
+        tab[pozx][pozy] = 'O';
+        headsprite.setPosition(pozx * 8, pozy * 12);
+        poz[dlugosc - 1][0] += glpdX;
+        poz[dlugosc - 1][1] += glpdY;
+    }
     raz++;
 }
 
 void opposite(char &c, int stare)
 {
-    if (c==-stare)
-        {c=stare;
+    if (c == -stare) {
+        c = stare;
         return;
-        }
+    }
 }
 
 void rankingowanie(int hajskor[10], string nejm[10], int wynik, string nick)
 {
-    if (hajskor[0]<1)
-        {hajskor[0]=wynik;
-        nejm[0]=nick;
+    if (hajskor[0] < 1) {
+        hajskor[0] = wynik;
+        nejm[0] = nick;
         return;
-        }
-    for (int i=0; i<10; i++)
-        {if (wynik>hajskor[i])
-            {for (int j=0; j<9-i; j++)
-                hajskor[9-j]=hajskor[9-j-1];
-            for (int j=0; j<9-i; j++)
-                nejm[9-j]=nejm[9-j-1];
-            hajskor[i]=wynik;
-            nejm[i]=nick;
-            return;
+    }
+    for (int i = 0; i < 10; i++) {
+        if (wynik > hajskor[i]) {
+            for (int j = 0; j < 9 - i; j++) {
+                hajskor[9 - j] = hajskor[9 - j - 1];
             }
+            for (int j = 0; j < 9 - i; j++) {
+                nejm[9 - j] = nejm[9 - j - 1];
+            }
+            hajskor[i] = wynik;
+            nejm[i] = nick;
+            return;
         }
+    }
 }
 
 bool not_moved(char c[])
 {
-    for (int i=0; i<players; i++)
-        {if (c[i] == '!')
+    for (int i = 0; i < players; i++) {
+        if (c[i] == '!') {
             return true;
         }
+    }
     return false;
 }
 
-void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
+void griel(sf::Event event)
 {
     /*fstream f_players;
     f_players.open("./Data/players.txt", ios::in);
@@ -355,7 +343,7 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     if (players<1 || players>6)
         players=1;*/
 
-    bool koniec=false, pauza=false, pla_cho=false;
+    bool koniec = false, pla_cho = false;
 
     sf::Font font;
     font.loadFromFile("./Data/TerminalVector.ttf");
@@ -369,11 +357,11 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     line3.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::Text le[6], gr[6];
-    for (int l=0; l<6; l++)
-        {le[l].setFont(font);
+    for (int l = 0; l < 6; l++) {\
+        le[l].setFont(font);
         le[l].setCharacterSize(120);
         le[l].setFillColor(sf::Color(255, 255, 255, 180));
-        }
+    }
     le[0].setString("1");
     le[0].setPosition(70, 25);
     le[1].setString("2");
@@ -391,12 +379,12 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     gr[0].setCharacterSize(20);
     gr[0].setFillColor(sf::Color(255, 255, 255, 180));
     gr[0].setString("GRACZ");
-    for (int k=1; k<6; k++)
-        {gr[k].setFont(font);
+    for (int k = 1; k < 6; k++) {
+        gr[k].setFont(font);
         gr[k].setCharacterSize(20);
         gr[k].setFillColor(sf::Color(255, 255, 255, 180));
         gr[k].setString("GRACZY");
-        }
+    }
     gr[0].setPosition(65, 155);
     gr[1].setPosition(252, 155);
     gr[2].setPosition(451, 155);
@@ -405,117 +393,116 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     gr[5].setPosition(451, 375);
 
 
-    while (!koniec)
-        {while (WONSZ.pollEvent(event))
-            {if (event.type == sf::Event::Closed)
-                {umriel=true;
+    while (!koniec) {
+        while (WONSZ.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                flagi.koniec = true;
                 return;
-                }
-            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Right)
-                koniec=true;
-            if (event.type == sf::Event::LostFocus)
-                pauza=true;
-            if (event.type == sf::Event::GainedFocus)
-                pauza=false;
-            if (pauza)
-                {Sleep(10);
+            }
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Right) {
+                koniec = true;
+            }
+            if (event.type == sf::Event::LostFocus) {
+                flagi.pauza = true;
+            }
+            if (event.type == sf::Event::GainedFocus) {
+                flagi.pauza = false;
+            }
+            if (flagi.pauza) {
+                Sleep(10);
                 continue;
+            }
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left) {
+                if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x < (195 * pix_w / 584)) {
+                    players = 1;
+                    pla_cho = true;
                 }
-            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left)
-                {if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-                    {players=1;
-                    pla_cho=true;
-                    }
-                if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-                    {players=2;
-                    pla_cho=true;
-                    }
-                if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-                    {players=3;
-                    pla_cho=true;
-                    }
-                if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-                    {players=4;
-                    pla_cho=true;
-                    }
-                if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-                    {players=5;
-                    pla_cho=true;
-                    }
-                if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-                    {players=6;
-                    pla_cho=true;
-                    }
+                if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (195 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (390 * pix_w / 584)) {
+                    players = 2;
+                    pla_cho = true;
+                }
+                if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (390 * pix_w / 584)) {
+                    players = 3;
+                    pla_cho = true;
+                }
+                if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h/424) && sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x < (195 * pix_w / 584)) {
+                    players = 4;
+                    pla_cho = true;
+                }
+                if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (195 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (390 * pix_w / 584)) {
+                    players = 5;
+                    pla_cho = true;
+                }
+                if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (390 * pix_w / 584)) {
+                    players = 6;
+                    pla_cho = true;
                 }
             }
+        }
 
-        if (pla_cho)
+        if (pla_cho) {
             break;
+        }
 
-        if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-            {le[0].setFillColor(sf::Color(255, 255, 255));
+        if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x < (195 * pix_w / 584)) {
+            le[0].setFillColor(sf::Color(255, 255, 255));
             gr[0].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[0].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[0].setFillColor(sf::Color(255, 255, 255, 180));
             gr[0].setFillColor(sf::Color(255, 255, 255, 180));
-            }
-        if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-            {le[1].setFillColor(sf::Color(255, 255, 255));
+        }
+        if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (195 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (390 * pix_w / 584)) {
+            le[1].setFillColor(sf::Color(255, 255, 255));
             gr[1].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[1].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[1].setFillColor(sf::Color(255, 255, 255, 180));
             gr[1].setFillColor(sf::Color(255, 255, 255, 180));
-            }
-        if (sf::Mouse::getPosition(WONSZ).y < (212*pix_h/424) && sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-            {le[2].setFillColor(sf::Color(255, 255, 255));
+        }
+        if (sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (390 * pix_w / 584)) {
+            le[2].setFillColor(sf::Color(255, 255, 255));
             gr[2].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[2].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[2].setFillColor(sf::Color(255, 255, 255, 180));
             gr[2].setFillColor(sf::Color(255, 255, 255, 180));
-            }
-        if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x < (195*pix_w/584))
-            {le[3].setFillColor(sf::Color(255, 255, 255));
+        }
+        if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x < (195 * pix_w / 584)) {
+            le[3].setFillColor(sf::Color(255, 255, 255));
             gr[3].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[3].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[3].setFillColor(sf::Color(255, 255, 255, 180));
             gr[3].setFillColor(sf::Color(255, 255, 255, 180));
-            }
-        if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x > (195*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (390*pix_w/584))
-            {le[4].setFillColor(sf::Color(255, 255, 255));
+        }
+        if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (195 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (390 * pix_w / 584)) {
+            le[4].setFillColor(sf::Color(255, 255, 255));
             gr[4].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[4].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[4].setFillColor(sf::Color(255, 255, 255, 180));
             gr[4].setFillColor(sf::Color(255, 255, 255, 180));
-            }
-        if (sf::Mouse::getPosition(WONSZ).y > (212*pix_h/424) &&sf::Mouse::getPosition(WONSZ).x > (390*pix_w/584))
-            {le[5].setFillColor(sf::Color(255, 255, 255));
+        }
+        if (sf::Mouse::getPosition(WONSZ).y > (212 * pix_h / 424) && sf::Mouse::getPosition(WONSZ).x > (390 * pix_w / 584)) {
+            le[5].setFillColor(sf::Color(255, 255, 255));
             gr[5].setFillColor(sf::Color(255, 255, 255));
-            }
-        else
-            {le[5].setFillColor(sf::Color(255, 255, 255, 180));
+        } else {
+            le[5].setFillColor(sf::Color(255, 255, 255, 180));
             gr[5].setFillColor(sf::Color(255, 255, 255, 180));
-            }
+        }
 
         WONSZ.clear(sf::Color(0, 0, 0));
         WONSZ.draw(line1);
         WONSZ.draw(line2);
         WONSZ.draw(line3);
-        for (int e=0; e<6; e++)
-            {WONSZ.draw(le[e]);
+        for (int e = 0; e < 6; e++) {
+            WONSZ.draw(le[e]);
             WONSZ.draw(gr[e]);
-            }
+        }
         WONSZ.display();
         Sleep(10);
-        }
+    }
 
     WONSZ.clear(sf::Color(0, 0, 0));
-    if (koniec)
+    if (koniec) {
         return;
+    }
 
     sf::Texture gra;
     gra.loadFromFile("./Data/gra.png");
@@ -527,20 +514,23 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     sf::Texture head;
     head.loadFromFile("./Data/glowa.png");
     sf::Sprite headsprite[players];
-    for (int p=0; p<players; p++)
+    for (int p = 0; p < players; p++) {
         headsprite[p].setTexture(head);
+    }
 
     sf::Texture belly;
     belly.loadFromFile("./Data/brzuch.png");
     sf::Sprite bellysprite[players];
-    for (int p=0; p<players; p++)
+    for (int p = 0; p < players; p++) {
         bellysprite[p].setTexture(belly);
+    }
 
     sf::Texture tail;
     tail.loadFromFile("./Data/ogon.png");
     sf::Sprite tailsprite[players];
-    for (int p=0; p<players; p++)
+    for (int p = 0; p < players; p++) {
         tailsprite[p].setTexture(tail);
+    }
 
     sf::Texture nicktexture;
     nicktexture.loadFromFile("./Data/nick.png");
@@ -549,8 +539,8 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     nicksprite.setPosition(169, 159);
 
     sf::Text wyniktext[players], okr[players];
-    for (int p=0; p<players; p++)
-        {wyniktext[p].setString("");
+    for (int p = 0; p < players; p++) {
+        wyniktext[p].setString("");
         okr[p].setPosition(274, 163);
         wyniktext[p].setFont(font);
         okr[p].setFont(font);
@@ -558,24 +548,31 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
         okr[p].setCharacterSize(12);
         wyniktext[p].setFillColor(sf::Color(255, 255, 255, 180));
         okr[p].setFillColor(sf::Color(255, 255, 255, 180));
-        }
-    switch (players)
-        {case 1: wyniktext[0].setPosition(244, 399);
+    }
+    switch (players) {
+        case 1: {
+            wyniktext[0].setPosition(244, 399);
             okr[0].setString(L"↑←→↓");
             break;
-        case 2: wyniktext[0].setPosition(0, 399);
+        }
+        case 2: {
+            wyniktext[0].setPosition(0, 399);
             wyniktext[1].setPosition(488, 399);
             okr[0].setString("WADS");
             okr[1].setString(L"↑←→↓");
             break;
-        case 3: wyniktext[0].setPosition(0, 399);
+        }
+        case 3: {
+            wyniktext[0].setPosition(0, 399);
             wyniktext[1].setPosition(244, 399);
             wyniktext[2].setPosition(488, 399);
             okr[0].setString("WADS");
             okr[1].setString(L"↑←→↓");
             okr[2].setString("TFHG");
             break;
-        case 4: wyniktext[0].setPosition(0, 393);
+        }
+        case 4: {
+            wyniktext[0].setPosition(0, 393);
             wyniktext[1].setPosition(488, 393);
             wyniktext[2].setPosition(0, 405);
             wyniktext[3].setPosition(488, 405);
@@ -584,7 +581,9 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
             okr[2].setString("TFHG");
             okr[3].setString("IJLK");
             break;
-        case 5: wyniktext[0].setPosition(0, 393);
+        }
+        case 5: {
+            wyniktext[0].setPosition(0, 393);
             wyniktext[1].setPosition(488, 393);
             wyniktext[2].setPosition(244, 399);
             wyniktext[3].setPosition(0, 405);
@@ -596,7 +595,9 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
             okr[4].setString("HomeDelPgdnEnd");
             okr[4].setPosition(234, 163);
             break;
-        case 6: wyniktext[0].setPosition(0, 393);
+        }
+        case 6: {
+            wyniktext[0].setPosition(0, 393);
             wyniktext[1].setPosition(244, 393);
             wyniktext[2].setPosition(488, 393);
             wyniktext[3].setPosition(0, 405);
@@ -611,6 +612,7 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
             okr[5].setString("8465");
             break;
         }
+    }
 
     sf::Text mniamtext("", font);
     mniamtext.setCharacterSize(12);
@@ -641,269 +643,332 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
 	sf::Sound tlo;
 	tlo.setBuffer(tlobuffer);
 
-    ifstream pliksound;
-    pliksound.open("./Data/sound.txt", ios::in);
-    if(pliksound.good())
-        {pliksound>>sound;
-        pliksound.close();
-        }
-
     bool oddzielne;
     ifstream tog_sep;
     tog_sep.open("./Data/tog-sep.txt", ios::in);
-    if(tog_sep.good())
-        {tog_sep>>oddzielne;
+    if (tog_sep.good()) {
+        tog_sep >> oddzielne;
         tog_sep.close();
-        }
+    }
 
     short raz[players];
-    int decimal=10, sen=0, sseenn=0, kon=players;
+    int decimal = 10, sen = 0, sseenn = 0, kon = players;
     int wynik[players], score[players], dlugosc[players], d[players];
-    string reszta="", wyn[players];
+    string reszta = "", wyn[players];
     char c[players], stare[players];
-    unsigned char tab[73][33], poz[players][2201][2], mniam=0, x=0, y=0, pozx=0, pozy=0;
-    bool zjadl=false, w_grze[players];
-    for (int l=0; l<players; l++)
-        {raz[l]=0;
-        wynik[l]=0;
-        score[l]=0;
-        dlugosc[l]=3;
-        d[l]=0;
-        wyn[l]="";
-        c[l]='!';
-        stare[l]='1';
-        w_grze[l]=true;
-        }
-    srand(time(NULL));
-    poczatek(tab, mniam, x, y, mniamtext);
+    unsigned char tab[73][33], poz[players][2201][2], mniam = 0, pozx = 0, pozy = 0;
+    bool zjadl = false, w_grze[players];
+    for (int l = 0; l < players; l++) {
+        raz[l] = 0;
+        wynik[l] = 0;
+        score[l] = 0;
+        dlugosc[l] = 3;
+        d[l] = 0;
+        wyn[l] = "";
+        c[l] = '!';
+        stare[l] = '1';
+        w_grze[l] = true;
+    }
+    poczatek(tab, mniam, mniamtext);
     ifstream pliksen;
     pliksen.open("./Data/sen.txt", ios::in);
-    if(pliksen.good() == true)
-        {pliksen>>sen;
+    if (pliksen.good()) {
+        pliksen >> sen;
         pliksen.close();
-        }
+    }
     sseenn=sen;
 
-    do
-        {while(WONSZ.pollEvent(event))
-            {if (event.type == sf::Event::Closed)
-                {umriel=true;
+    do {
+        while(WONSZ.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                flagi.koniec = true;
                 return;
-                }
+            }
 
-            if (event.type == sf::Event::LostFocus)
-                pauza=true;
-            if (event.type == sf::Event::GainedFocus)
-                pauza=false;
-            if (pauza)
+            if (event.type == sf::Event::LostFocus) {
+                flagi.pauza = true;
+            }
+            if (event.type == sf::Event::GainedFocus) {
+                flagi.pauza = false;
+            }
+            if (flagi.pauza) {
                 break;
+            }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
-                c[0]=-2;
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up) {
+                c[0] = -2;
+            }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Left)
-                c[0]=-1;
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Left) {
+                c[0] = -1;
+            }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Right)
-                c[0]=1;
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Right) {
+                c[0] = 1;
+            }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Down)
-                c[0]=2;
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Down) {
+                c[0] = 2;
+            }
 
-            if (players>1)
-                {if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W)
-                    c[1]=-2;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
-                    c[1]=-1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
-                    c[1]=1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
-                    c[1]=2;
+            if (players > 1) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W) {
+                    c[1] = -2;
                 }
 
-            if (players>2)
-                {if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::T)
-                    c[2]=-2;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
-                    c[2]=-1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::H)
-                    c[2]=1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G)
-                    c[2]=2;
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A) {
+                    c[1] = -1;
                 }
 
-            if (players>3)
-                {if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::I)
-                    c[3]=-2;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::J)
-                    c[3]=-1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::L)
-                    c[3]=1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K)
-                    c[3]=2;
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D) {
+                    c[1] = 1;
                 }
 
-            if (players>4)
-                {if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Home)
-                    c[4]=-2;
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S) {
+                    c[1] = 2;
+                }
+            }
 
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete)
-                    c[4]=-1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::PageDown)
-                    c[4]=1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::End)
-                    c[4]=2;
+            if (players > 2) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::T) {
+                    c[2] = -2;
                 }
 
-            if (players>5)
-                {if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad8)
-                    c[5]=-2;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad4)
-                    c[5]=-1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad6)
-                    c[5]=1;
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad5)
-                    c[5]=2;
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F) {
+                    c[2] = -1;
                 }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
-                c[0]='p';
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::H) {
+                    c[2] = 1;
+                }
 
-            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right)
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
+                    c[2] = 2;
+                }
+            }
+
+            if (players>3) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::I) {
+                    c[3] = -2;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::J) {
+                    c[3] = -1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::L) {
+                    c[3] = 1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K) {
+                    c[3] = 2;
+                }
+            }
+
+            if (players>4) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Home) {
+                    c[4] = -2;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete) {
+                    c[4] = -1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::PageDown) {
+                    c[4] = 1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::End) {
+                    c[4] = 2;
+                }
+            }
+
+            if (players>5) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad8) {
+                    c[5] = -2;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad4) {
+                    c[5] = -1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad6) {
+                    c[5] = 1;
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad5) {
+                    c[5] = 2;
+                }
+            }
+
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P) {
+                c[0] = 'p';
+            }
+
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
                 koniec=true;
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F2 && dev == true)
-                d[0]=0;
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-                sseenn=sen/2;
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-                sseenn=sen*2;
-            else
-                sseenn=sen;
             }
 
-        if (c[0]=='p' || pauza==true || not_moved(c))
-            {Sleep(10);
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F2 && flagi.dev == true) {
+                d[0] = 0;
+            }
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+                sseenn = sen/2;
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+                sseenn = sen*2;
+            } else {
+                sseenn = sen;
+            }
+        }
+
+        if (c[0] == 'p' || flagi.pauza == true || not_moved(c)) {
+            Sleep(10);
             continue;
-            }
+        }
 
-        for (int p=0; p<players; p++)
-            {opposite(c[p], stare[p]);
-            if (w_grze[p])
-                {switch (c[p])
-                    {case -2: ruch(raz[p], pozx, pozy, tab, koniec, mniam, x, y, d[p], dlugosc[p], poz[p], zjadl, 0, -1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+        for (int p = 0; p < players; p++) {
+            opposite(c[p], stare[p]);
+            if (w_grze[p]) {
+                switch (c[p]) {
+                    case -2: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 0, -1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
-                    case -1: ruch(raz[p], pozx, pozy, tab, koniec, mniam, x, y, d[p], dlugosc[p], poz[p], zjadl, -1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+                    }
+                    case -1: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, -1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
-                    case 1: ruch(raz[p], pozx, pozy, tab, koniec, mniam, x, y, d[p], dlugosc[p], poz[p], zjadl, 1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+                    }
+                    case 1: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
-                    case 2: ruch(raz[p], pozx, pozy, tab, koniec, mniam, x, y, d[p], dlugosc[p], poz[p], zjadl, 0, 1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+                    }
+                    case 2: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 0, 1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
-                    default: continue;
+                    }
+                    default: {
+                        continue;
                     }
                 }
-            if (koniec && oddzielne)
-                {w_grze[p]=false;
-                kon--;
-                koniec=false;
-                }
             }
-        if (kon == 0)
-            koniec=true;
+            if (koniec && oddzielne) {
+                w_grze[p] = false;
+                kon--;
+                koniec = false;
+            }
+        }
+        if (kon == 0) {
+            koniec = true;
+        }
 
-		if (dzwiek==true)
-            {if (koniec==true)
+		if (flagi.dzwiek == true) {
+            if (koniec == true) {
                 stuk.play();
-            else
-                {if (zjadl==true)
+            } else {
+                if (zjadl == true) {
                     haps.play();
-                else
+                } else {
                     krok.play();
                 }
             }
-        zjadl=false;
+		}
+        zjadl = false;
 
-        for (int p=0; p<players; p++)
-            stare[p]=c[p];
-        for (int p=0; p<players; p++)
-            wynik[p]=dlugosc[p]-3;
-        if(players>1)
-            {wynik[0]=wynik[1];
-            wynik[1]=dlugosc[0]-3;
-            }
-        for (int p=0; p<players; p++)
-            score[p]=wynik[p];
+        for (int p = 0; p < players; p++) {
+            stare[p] = c[p];
+        }
+        for (int p = 0; p < players; p++) {
+            wynik[p] = dlugosc[p] - 3;
+        }
+        if (players > 1) {
+            wynik[0] = wynik[1];
+            wynik[1] = dlugosc[0] - 3;
+        }
+        for (int p=0; p<players; p++) {
+            score[p] = wynik[p];
+        }
 
-        for (int p=0; p<players; p++)
-            {wyn[p]="";
-            if (score[p]==0)
-                wyn[p]="00000";
-            else
-                {while (score[p]!=0)
-                    {switch ((score[p]%decimal)/(decimal/10))
-                        {case 0: reszta="0";
-                            break;
-                        case 1: reszta="1";
-                            break;
-                        case 2: reszta="2";
-                            break;
-                        case 3: reszta="3";
-                            break;
-                        case 4: reszta="4";
-                            break;
-                        case 5: reszta="5";
-                            break;
-                        case 6: reszta="6";
-                            break;
-                        case 7: reszta="7";
-                            break;
-                        case 8: reszta="8";
-                            break;
-                        case 9: reszta="9";
+        for (int p = 0; p < players; p++) {
+            wyn[p] = "";
+            if (score[p] == 0) {
+                wyn[p] = "00000";
+            } else {
+                while (score[p]!=0) {
+                    switch ((score[p] % decimal) / (decimal / 10)) {
+                        case 0: {
+                            reszta = "0";
                             break;
                         }
-                    wyn[p] = reszta + wyn[p];
-                    score[p] -= (score[p]%decimal);
-                    decimal = decimal*10;
+                        case 1: {
+                            reszta = "1";
+                            break;
+                        }
+                        case 2: {
+                            reszta = "2";
+                            break;
+                        }
+                        case 3: {
+                            reszta = "3";
+                            break;
+                        }
+                        case 4: {
+                            reszta = "4";
+                            break;
+                        }
+                        case 5: {
+                            reszta = "5";
+                            break;
+                        }
+                        case 6: {
+                            reszta = "6";
+                            break;
+                        }
+                        case 7: {
+                            reszta = "7";
+                            break;
+                        }
+                        case 8: {
+                            reszta = "8";
+                            break;
+                        }
+                        case 9: {
+                            reszta = "9";
+                            break;
+                        }
                     }
+                    wyn[p] = reszta + wyn[p];
+                    score[p] -= (score[p] % decimal);
+                    decimal = decimal * 10;
                 }
-            if (decimal == 100)
-                wyn[p] = "0000" + wyn[p];
-            if (decimal == 1000)
-                wyn[p] = "000" + wyn[p];
-            if (decimal == 10000)
-                wyn[p] = "00" + wyn[p];
-            if (decimal == 100000)
-                wyn[p] = "0" + wyn[p];
-            decimal=10;
-            wyn[p]="WYNIK:"+wyn[p];
-            wyniktext[p].setString(wyn[p]);
             }
+            if (decimal == 100) {
+                wyn[p] = "0000" + wyn[p];
+            }
+            if (decimal == 1000) {
+                wyn[p] = "000" + wyn[p];
+            }
+            if (decimal == 10000) {
+                wyn[p] = "00" + wyn[p];
+            }
+            if (decimal == 100000) {
+                wyn[p] = "0" + wyn[p];
+            }
+            decimal = 10;
+            wyn[p] = "WYNIK:" + wyn[p];
+            wyniktext[p].setString(wyn[p]);
+        }
 
         rysuj_basic(mniamtext, grasprite);
-        for (int p=0; p<players; p++)
+        for (int p = 0; p < players; p++) {
             rysuj_once(dlugosc[p], headsprite[p], bellysprite[p], tailsprite[p], wyniktext[p], poz[p]);
+        }
         WONSZ.display();
 
         Sleep(sseenn);
-        }while (koniec != true);
+    } while (koniec != true);
 
-    char spacja=32;
+    char spacja = 32;
     string user;
     bool backspc, enter, rajt;
 
@@ -915,100 +980,112 @@ void griel(bool dzwiek, sf::Event event, bool &umriel, bool dev)
     string nejm[10];
     fstream plik;
 
-    for (int p=0; p<players; p++)
-        {if (wynik[p]>0)
-            {user="";
-            backspc=false;
+    for (int p = 0; p < players; p++) {
+        if (wynik[p] > 0) {
+            user = "";
+            backspc = false;
             nicktext.setString(user);
-            enter=false;
-            rajt=false;
-            while (enter==false || user.length()==0)
-                {while(WONSZ.pollEvent(event))
-                    {if (event.type == sf::Event::Closed)
-                        {umriel=true;
+            enter = false;
+            rajt = false;
+            while (enter == false || user.length() == 0) {
+                while(WONSZ.pollEvent(event)) {
+                    if (event.type == sf::Event::Closed) {
+                        flagi.koniec = true;
                         return;
-                        }
-                    if (event.type == sf::Event::LostFocus)
-                        pauza=true;
-                    if (event.type == sf::Event::GainedFocus)
-                        pauza=false;
-                    if (pauza)
-                        {Sleep(10);
+                    }
+                    if (event.type == sf::Event::LostFocus) {
+                        flagi.pauza = true;
+                    }
+                    if (event.type == sf::Event::GainedFocus) {
+                        flagi.pauza = false;
+                    }
+                    if (flagi.pauza) {
+                        Sleep(10);
                         continue;
-                        }
-                    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Right)
-                        rajt=true;
-                    if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Return)
-                        enter=true;
-                    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace)
-                        {if (user.length()>0)
-                            {user.erase(user.end()-1);
+                    }
+                    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Right) {
+                        rajt = true;
+                    }
+                    if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Return) {
+                        enter = true;
+                    }
+                    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace) {
+                        if (user.length() > 0) {
+                            user.erase(user.end()-1);
                             nicktext.setString(user);
-                            backspc=true;
-                            }
-                        else
-                            backspc=true;
+                            backspc = true;
+                        } else {
+                            backspc = true;
                         }
-                    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
-                        {user += " ";
+                    }
+                    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
+                        user += " ";
                         nicktext.setString(user);
-                        backspc=true;
-                        }
-                    if (backspc!=true)
-                        {if (event.type == sf::Event::TextEntered)
-                            {if (event.text.unicode < 128)
-                                {user += static_cast<char>(event.text.unicode);
+                        backspc = true;
+                    }
+                    if (backspc != true) {
+                        if (event.type == sf::Event::TextEntered) {
+                            if (event.text.unicode < 128) {
+                                user += static_cast<char>(event.text.unicode);
                                 nicktext.setString(user);
-                                }
                             }
                         }
                     }
-                if (rajt)
+                }
+                if (rajt) {
                     break;
-                backspc=false;
-                if (user.length()>12)
-                    {user.erase(user.end()-1);
+                }
+                backspc = false;
+                if (user.length() > 12) {
+                    user.erase(user.end() - 1);
                     nicktext.setString(user);
-                    }
+                }
                 WONSZ.clear(sf::Color(0, 0, 0));
                 WONSZ.draw(grasprite);
-                for (int r=0; r<players; r++)
+                for (int r = 0; r < players; r++) {
                     WONSZ.draw(headsprite[r]);
-                for (int r=0; r<players; r++)
-                    {for (int i=2; i<dlugosc[r]; i++)
-                        {bellysprite[r].setPosition(poz[r][i-1][0]*8, poz[r][i-1][1]*12);
+                }
+                for (int r = 0; r < players; r++) {
+                    for (int i = 2; i < dlugosc[r]; i++) {
+                        bellysprite[r].setPosition(poz[r][i - 1][0] * 8, poz[r][i - 1][1] * 12);
                         WONSZ.draw(bellysprite[r]);
-                        }
                     }
-                for (int r=0; r<players; r++)
+                }
+                for (int r = 0; r < players; r++) {
                     WONSZ.draw(wyniktext[r]);
+                }
                 WONSZ.draw(mniamtext);
-                for (int r=0; r<players; r++)
+                for (int r = 0; r < players; r++) {
                     WONSZ.draw(tailsprite[r]);
+                }
                 WONSZ.draw(nicksprite);
                 WONSZ.draw(okr[p]);
                 WONSZ.draw(nicktext);
                 WONSZ.display();
                 Sleep(10);
-                }
-            if (!rajt)
-                {plik.open("./Data/ranking.txt", ios::in | ios::out);
-                if(plik.good() == true)
-                    {for (int i=0; i<10; i++)
+            }
+            if (!rajt) {
+                plik.open("./Data/ranking.txt", ios::in | ios::out);
+                if (plik.good() == true) {
+                    for (int i=0; i<10; i++) {
                         plik>>hajskor[i];
-                    for (int i=0; i<10; i++)
+                    }
+                    for (int i=0; i<10; i++) {
                         plik>>nejm[i];
+                    }
                     plik.seekg(0, ios_base::beg);
                     rankingowanie(hajskor, nejm, wynik[p], user);
-                    for (int i=0; i<10; i++)
+                    for (int i=0; i<10; i++) {
                         plik<<hajskor[i]<<(char)spacja;
-                    for (int i=0; i<10; i++)
-                        plik<<nejm[i]<<(char)spacja;
-                    plik.close();
                     }
+                    for (int i=0; i<10; i++) {
+                        plik<<nejm[i]<<(char)spacja;
+                    }
+                    plik.close();
                 }
             }
         }
+    }
     Sleep(150);
 }
 
@@ -1248,7 +1325,7 @@ void szybwyp(int &szybkosc)
         }
 }
 
-void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc, sf::Event event, sf::Sound tlo, bool &umriel)
+void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc, sf::Event event, sf::Sound tlo)
 {
 	sf::Texture opcje;
     opcje.loadFromFile("./Data/opcje.png");
@@ -1288,7 +1365,7 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
     sf::Sprite downsprite;
     downsprite.setTexture(down);
 
-    bool reset=false, pauza=false, opcje_koniec=false, oddzielne;
+    bool reset=false, opcje_koniec=false, oddzielne;
 
     ifstream tog_sep;
     tog_sep.open("./Data/tog-sep.txt", ios::in);
@@ -1324,8 +1401,8 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (134*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (140*pix_h/416))
             WONSZ.draw(upsprite);
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (134*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (140*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
-            {dzwiek =! dzwiek;
-            if (dzwiek)
+            {flagi.dzwiek =! flagi.dzwiek;
+            if (flagi.dzwiek)
                 dzwiek01="TAK";
             else
                 dzwiek01="NIE";
@@ -1369,8 +1446,8 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (160*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (168*pix_h/416))
             WONSZ.draw(downsprite);
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (160*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (168*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
-            {dzwiek =! dzwiek;
-            if (dzwiek)
+            {flagi.dzwiek =! flagi.dzwiek;
+            if (flagi.dzwiek)
                 dzwiek01="TAK";
             else
                 dzwiek01="NIE";
@@ -1421,16 +1498,16 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
 
         while (WONSZ.pollEvent(event))
             {if (event.type == sf::Event::Closed)
-                {if (dzwiek)
+                {if (flagi.dzwiek)
                     tlo.stop();
-                umriel=true;
+                flagi.koniec=true;
                 return;
                 }
             if (event.type == sf::Event::LostFocus)
-                pauza=true;
+                flagi.pauza=true;
             if (event.type == sf::Event::GainedFocus)
-                pauza=false;
-            if (pauza)
+                flagi.pauza=false;
+            if (flagi.pauza)
                 {Sleep(10);
                 continue;
                 }
@@ -1458,7 +1535,7 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
     ofstream plikdzwiek2;
     plikdzwiek2.open("./Data/sound.txt", ios::out);
     if(plikdzwiek2.good())
-        {if (dzwiek==true)
+        {if (flagi.dzwiek==true)
             plikdzwiek2<<'1';
         else
             plikdzwiek2<<'0';
@@ -1484,7 +1561,7 @@ void opcje(bool &dzwiek, sf::String &dzwiek01, sf::Font font, sf::String &szybk,
     szybwczyt(szybkosc, szybk);
 }
 
-void intro(bool dzwiek, bool &umriel, sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Texture &pomoctexture, sf::Event &introevent, bool &pauza)
+void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Texture &pomoctexture, sf::Event &introevent)
 {
     int wonszintr=128;
 
@@ -1514,14 +1591,14 @@ void intro(bool dzwiek, bool &umriel, sf::Texture &menu, sf::Font &font, sf::Sou
 
     Sleep(1000);
 
-    if (dzwiek)
+    if (flagi.dzwiek)
         introsnd.play();
     for (int xd=0; xd<35; xd++)
         {while(WONSZ.pollEvent(introevent))
             {if (introevent.type == sf::Event::Closed)
-                {if (dzwiek)
+                {if (flagi.dzwiek)
                     introsnd.stop();
-                umriel=true;
+                flagi.koniec=true;
                 return;
                 }
             if (introevent.type == sf::Event::KeyPressed && introevent.key.code == sf::Keyboard::Space)
@@ -1539,15 +1616,15 @@ void intro(bool dzwiek, bool &umriel, sf::Texture &menu, sf::Font &font, sf::Sou
                 return;
                 }
             if (introevent.type == sf::Event::LostFocus)
-                {pauza=true;
+                {flagi.pauza=true;
                 introsnd.pause();
                 }
             if (introevent.type == sf::Event::GainedFocus)
-                {pauza=false;
+                {flagi.pauza=false;
                 introsnd.play();
                 }
             }
-        if (pauza)
+        if (flagi.pauza)
             {Sleep(10);
             xd--;
             continue;
@@ -1567,7 +1644,7 @@ void intro(bool dzwiek, bool &umriel, sf::Texture &menu, sf::Font &font, sf::Sou
     Sleep(300);
 }
 
-void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
+void ranking(sf::Event event, sf::Sound tlo)
 {
     sf::Font font;
     font.loadFromFile("./Data/TerminalVector.ttf");
@@ -1597,7 +1674,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
 
     for (int i=0; i<10; i++)
         {if (haj[i] == -1)
-            {hajskor[i]="-1";
+            {hajskor[i] = "-1";
             continue;
             }
         while (haj[i]!=0)
@@ -1640,12 +1717,12 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
 
     int lenght[10];
     for (int i=0; i<10; i++)
-        lenght[i]=(292-(32+(nejm[i].length()*8)+hajskor[i].length()*8)/2);
+        lenght[i] = (292-(32+(nejm[i].length()*8)+hajskor[i].length()*8)/2);
 
     sf::String frst;
-    if (hajskor[0]=="-1")
+    if (hajskor[0] == "-1")
         {frst="1. -----";
-        lenght[0]=260;
+        lenght[0] = 260;
         }
     else
         frst="1. "+nejm[0]+" "+hajskor[0];
@@ -1656,9 +1733,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     first.setFillColor(sf::Color(255, 255, 255, 180));
 
      sf::String scnd;
-    if (hajskor[1]=="-1")
+    if (hajskor[1] == "-1")
         {scnd="2. -----";
-        lenght[1]=260;
+        lenght[1] = 260;
         }
     else
         scnd="2. "+nejm[1]+" "+hajskor[1];
@@ -1669,9 +1746,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     second.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String thrd;
-    if (hajskor[2]=="-1")
+    if (hajskor[2] == "-1")
         {thrd="3. -----";
-        lenght[2]=260;
+        lenght[2] = 260;
         }
     else
         thrd="3. "+nejm[2]+" "+hajskor[2];
@@ -1682,9 +1759,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     third.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String frth;
-    if (hajskor[3]=="-1")
+    if (hajskor[3] == "-1")
         {frth="4. -----";
-        lenght[3]=260;
+        lenght[3] = 260;
         }
     else
         frth="4. "+nejm[3]+" "+hajskor[3];
@@ -1695,9 +1772,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     fourth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String ffth;
-    if (hajskor[4]=="-1")
+    if (hajskor[4] == "-1")
         {ffth="5. -----";
-        lenght[4]=260;
+        lenght[4] = 260;
         }
     else
         ffth="5. "+nejm[4]+" "+hajskor[4];
@@ -1708,9 +1785,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     fifth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String sxth;
-    if (hajskor[5]=="-1")
+    if (hajskor[5] == "-1")
         {sxth="6. -----";
-        lenght[5]=260;
+        lenght[5] = 260;
         }
     else
         sxth="6. "+nejm[5]+" "+hajskor[5];
@@ -1721,9 +1798,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     sixth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String svnth;
-    if (hajskor[6]=="-1")
+    if (hajskor[6] == "-1")
         {svnth="6. -----";
-        lenght[6]=260;
+        lenght[6] = 260;
         }
     else
         svnth="7. "+nejm[6]+" "+hajskor[6];
@@ -1734,9 +1811,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     seventh.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String ghth;
-    if (hajskor[7]=="-1")
+    if (hajskor[7] == "-1")
         {ghth="8. -----";
-        lenght[7]=260;
+        lenght[7] = 260;
         }
     else
         ghth="8. "+nejm[7]+" "+hajskor[7];
@@ -1747,9 +1824,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     eighth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String nnth;
-    if (hajskor[8]=="-1")
+    if (hajskor[8] == "-1")
         {nnth="9. -----";
-        lenght[8]=260;
+        lenght[8] = 260;
         }
     else
         nnth="9. "+nejm[8]+" "+hajskor[8];
@@ -1760,9 +1837,9 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     ninth.setFillColor(sf::Color(255, 255, 255, 180));
 
     sf::String tnth;
-    if (hajskor[9]=="-1")
+    if (hajskor[9] == "-1")
         {tnth="10. -----";
-        lenght[9]=256;
+        lenght[9] = 256;
         }
     else
         {tnth="10. "+nejm[9]+" "+hajskor[9];
@@ -1774,7 +1851,7 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
     tenth.setCharacterSize(12);
     tenth.setFillColor(sf::Color(255, 255, 255, 180));
 
-    bool ranking_koniec=false, pauza=false;
+    bool ranking_koniec=false;
 
     while (ranking_koniec == false)
         {WONSZ.clear(sf::Color(0, 0, 0));
@@ -1792,16 +1869,16 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
         WONSZ.display();
         while(WONSZ.pollEvent(event))
             {if (event.type == sf::Event::Closed)
-                {if (dzwiek)
+                {if (flagi.dzwiek)
                     tlo.stop();
-                umriel=true;
+                flagi.koniec=true;
                 return;
                 }
             if (event.type == sf::Event::LostFocus)
-                pauza=true;
+                flagi.pauza=true;
             if (event.type == sf::Event::GainedFocus)
-                pauza=false;
-            if (pauza)
+                flagi.pauza=false;
+            if (flagi.pauza)
                 {Sleep(10);
                 continue;
                 }
@@ -1812,25 +1889,25 @@ void ranking(sf::Event event, sf::Sound tlo, bool dzwiek, bool &umriel)
         }
 }
 
-void pomoc(sf::Event event, sf::Sprite pomocsprite, sf::Sound tlo, bool dzwiek, bool &umriel)
+void pomoc(sf::Event event, sf::Sprite pomocsprite, sf::Sound tlo)
 {
-    bool pomoc_koniec=false, pauza=false;
+    bool pomoc_koniec=false;
     while (pomoc_koniec==false)
         {WONSZ.clear(sf::Color(0, 0, 0));
         WONSZ.draw(pomocsprite);
         WONSZ.display();
         while(WONSZ.pollEvent(event))
             {if (event.type == sf::Event::Closed)
-                {if (dzwiek)
+                {if (flagi.dzwiek)
                     tlo.stop();
-                umriel=true;
+                flagi.koniec=true;
                 return;
                 }
             if (event.type == sf::Event::LostFocus)
-                pauza=true;
+                flagi.pauza=true;
             if (event.type == sf::Event::GainedFocus)
-                pauza=false;
-            if (pauza)
+                flagi.pauza=false;
+            if (flagi.pauza)
                 {Sleep(10);
                 continue;
                 }
@@ -1853,23 +1930,23 @@ int main()
     sf::Texture pomoctexture;
     sf::Event event;
 
-	bool dzwiek, umriel=false, dev;
-    sf::String dzwiek01;
-    ifstream plikdzwiek;
-    plikdzwiek.open("./Data/sound.txt", ios::in);
-    if (plikdzwiek.good() == true)
-        {plikdzwiek>>dzwiek;
+	sf::String dzwiek01;
+    ifstream plikdzwiek("./Data/sound.txt", ios::in);
+    if (plikdzwiek.good()) {
+        plikdzwiek >> flagi.dzwiek;
         plikdzwiek.close();
-        }
-    if (dzwiek)
+    } else {
+        ;///error
+    }
+
+    if (flagi.dzwiek)
         dzwiek01="TAK";
     else
         dzwiek01="NIE";
 
-    bool pauza=false;
                                                             ///INTRO
 
-    intro(dzwiek, umriel, menu, font, tlobuffer, pomoctexture, event, pauza);
+    intro(menu, font, tlobuffer, pomoctexture, event);
 
 
     sf::Sprite menusprite;
@@ -1901,7 +1978,7 @@ int main()
     przycisk4.setCharacterSize(12);
     przycisk4.setFillColor(sf::Color(255, 255, 255, 180));
 
-    sf::Text przycisk5("WYJSCIE", font);
+    sf::Text przycisk5(L"WYJŚCIE", font);
     przycisk5.setPosition(264, 334);
     przycisk5.setCharacterSize(12);
     przycisk5.setFillColor(sf::Color(255, 255, 255, 180));
@@ -1910,14 +1987,13 @@ int main()
 	tlo.setBuffer(tlobuffer);
 	tlo.setLoop(true);
 
-    ifstream dev_file;
-    dev_file.open("dev", ios::in);
-    if (dev_file.good())
-        {dev_file>>dev;
+    ifstream dev_file("dev", ios::in);
+    if (dev_file.good()) {
+        dev_file >> flagi.dev;
         dev_file.close();
-        }
-    else
-        dev=false;
+    } else {
+        flagi.dev = false;
+    }
 
     int szybkosc;
     sf::String szybk;
@@ -1934,12 +2010,12 @@ int main()
     int place=0;
 
 
-    if (umriel)
+    if (flagi.koniec)
         {WONSZ.close();
         return 0;
         }
 
-    if (dzwiek==true)
+    if (flagi.dzwiek==true)
         tlo.play();
 
     while(WONSZ.isOpen())
@@ -1950,11 +2026,11 @@ int main()
             {if (event.type == sf::Event::Closed)
                 WONSZ.close();
             if (event.type == sf::Event::LostFocus)
-                {pauza=true;
+                {flagi.pauza=true;
                 tlo.pause();
                 }
             if (event.type == sf::Event::GainedFocus)
-                {pauza=false;
+                {flagi.pauza=false;
                 tlo.play();
                 }
 
@@ -1985,14 +2061,14 @@ int main()
             }
 
         if (esc_lvl == 0)
-            {if (dzwiek==true)
+            {if (flagi.dzwiek==true)
                 tlo.stop();
             WONSZ.close();
             }
         if (esc_lvl == 1)
             place=0;
 
-        if (pauza)
+        if (flagi.pauza)
             {Sleep(10);
             continue;
             }
@@ -2033,36 +2109,36 @@ int main()
                 WONSZ.display();
                 break;
             case 1: WONSZ.clear(sf::Color(0, 0, 0));
-                if (dzwiek==true)
+                if (flagi.dzwiek==true)
                     tlo.stop();
-                griel(dzwiek, event, umriel, dev);
-                if (umriel)
+                griel(event);
+                if (flagi.koniec)
                     {WONSZ.close();
                     return 0;
                     }
                 esc_lvl--;
-                if (dzwiek==true)
+                if (flagi.dzwiek==true)
                     tlo.play();
                 break;
             case 2: WONSZ.clear(sf::Color(0, 0, 0));
-                ranking(event, tlo, dzwiek, umriel);
-                if (umriel)
+                ranking(event, tlo);
+                if (flagi.koniec)
                     {WONSZ.close();
                     return 0;
                     }
                 esc_lvl--;
                 break;
             case 3: WONSZ.clear(sf::Color(0, 0, 0));
-                opcje(dzwiek, dzwiek01, font, szybk, szybkosc, event, tlo, umriel);
-                if (umriel)
+                opcje(dzwiek01, font, szybk, szybkosc, event, tlo);
+                if (flagi.koniec)
                     {WONSZ.close();
                     return 0;
                     }
                 esc_lvl--;
                 break;
             case 4: WONSZ.clear(sf::Color(0, 0, 0));
-                pomoc(event, pomocsprite, tlo, dzwiek, umriel);
-                if (umriel)
+                pomoc(event, pomocsprite, tlo);
+                if (flagi.koniec)
                     {WONSZ.close();
                     return 0;
                     }
