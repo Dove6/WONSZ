@@ -18,7 +18,7 @@
 				<Option output="bin/Debug/WONSZ" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
-				<Option compiler="gnu_gcc_compiler_x64" />
+				<Option compiler="x86-64_gnu_gcc_compiler" />
 				<Option use_console_runner="0" />
 				<Linker>
 					<Add library="sfml-audio-d" />
@@ -61,11 +61,11 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add directory="E:/PROGRAMOWANIE/biblioteki/include" />
+			<Add directory="E:/label/Pobrane/biblioteki/include" />
 		</Compiler>
 		<Linker>
-			<Add directory="E:/PROGRAMOWANIE/biblioteki/lib" />
-			<Add directory="E:/PROGRAMOWANIE/biblioteki/bin" />
+			<Add directory="E:/label/Pobrane/biblioteki/lib" />
+			<Add directory="E:/label/Pobrane/biblioteki/bin" />
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Unit filename="resource.rc">
