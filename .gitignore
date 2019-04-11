@@ -3,6 +3,7 @@ bin/**
 !bin/Release/WONSZ.exe
 **/nppBackup/**
 *.dll
+!bin/Release/*.dll
 Data/dev
 *.depend
 *.layout
