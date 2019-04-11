@@ -1,7 +1,7 @@
-obj
-bin
-nppBackup
-test_env
+obj/**
+bin/**
+!bin/Release/WONSZ.exe
+**/nppBackup/**
 *.dll
 Data/dev
 *.depend
