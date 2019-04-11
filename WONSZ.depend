@@ -73,7 +73,7 @@
 
 1463233712 source:g:\zzz soft zzz\programowanie\wonsz\wonszv6.0\src\resource.rc
 
-1552293186 source:e:\programowanie\wonsz\main.cpp
+1554984592 source:e:\programowanie\wonsz\main.cpp
 	<SFML/Graphics.hpp>
 	<SFML/Audio.hpp>
 	<SFML/Window.hpp>
@@ -88,6 +88,7 @@
 	<ctime>
 	<iomanip>
 	<random>
+	<algorithm>
 
 1523634224 source:e:\programowanie\wonsz\resource.rc
 

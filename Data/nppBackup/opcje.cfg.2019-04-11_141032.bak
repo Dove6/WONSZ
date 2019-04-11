@@ -1,5 +1,5 @@
 [BOOL]
 dzwiek = 1
-oddzielne_zycia = 0
+oddzielne_zycia = 1
 [INT]
 szybkosc = 28

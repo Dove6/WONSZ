@@ -56,8 +56,8 @@ void opcje_parser(ifstream &p_opcje)
                         opcje.dzwiek = wiersz[9] - 48;
                     }
                 } else if (nazwa_opcji == "oddzielne_zycia") {
-                    if (wiersz.size() >= 18) {
-                        opcje.dzwiek = wiersz[17] - 48;
+                    if (wiersz.size() >= 19) {
+                        opcje.oddzielne_zycia = wiersz[18] - 48;
                     }
                 } else if (nazwa_opcji == "szybkosc") {
                     if (wiersz.size() >= 12) {
@@ -342,16 +342,6 @@ bool not_moved(char c[])
 
 void griel(sf::Event event)
 {
-    /*fstream f_players;
-    f_players.open("./Data/players.txt", ios::in);
-    if(f_players.good())
-        {f_players >> players;
-        f_players.close();
-        }
-
-    if (players<1 || players>6)
-        players=1;*/
-
     bool koniec = false, pla_cho = false;
 
     sf::Font font;
