@@ -2,3 +2,4 @@ obj/*
 bin/*
 nppBackup/*
 test_env
+*.dll

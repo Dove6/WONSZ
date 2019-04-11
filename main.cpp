@@ -18,12 +18,17 @@ using namespace std;
 
 /* refaktoryzacja */
 struct {
-    bool dzwiek,
-         dev,
+    bool dev,
          pauza,
          koniec;
-} flagi = {true, false, false, false};
+} flagi = {false, false, false};
+struct {
+    bool dzwiek,
+         oddzielne_zycia;
+    int szybkosc;
+} opcje = {true, true, 15};
 unsigned short plansza = 0;
+sf::Clock zegar;
 
 random_device rd;
 mt19937 maszyna_losujaca(rd());
@@ -36,6 +41,33 @@ sf::RenderWindow WONSZ(sf::VideoMode(584, 424, 32), "WONSZ");
 int pix_h, pix_w;
 sf::Vector2u pix_s;
 short players;
+
+void opcje_parser(ifstream &p_opcje)
+{
+    string wiersz;
+    while (!p_opcje.eof()) {
+        getline(p_opcje, wiersz);
+        if (wiersz[0] != '[') {
+            size_t poz_spacja = wiersz.find(' ');
+            if (poz_spacja != string::npos) {
+                string nazwa_opcji = wiersz.substr(0, poz_spacja);
+                if (nazwa_opcji == "dzwiek") {
+                    if (wiersz.size() >= 10) {
+                        opcje.dzwiek = wiersz[9] - 48;
+                    }
+                } else if (nazwa_opcji == "oddzielne_zycia") {
+                    if (wiersz.size() >= 18) {
+                        opcje.dzwiek = wiersz[17] - 48;
+                    }
+                } else if (nazwa_opcji == "szybkosc") {
+                    if (wiersz.size() >= 12) {
+                        opcje.szybkosc = stoi(wiersz.substr(11));
+                    }
+                }
+            }
+        }
+    }
+}
 
 void losu(vector<vector<unsigned char>> &tab, unsigned char &mniam, sf::Text &mniamtext)
 {
@@ -386,7 +418,7 @@ void griel(sf::Event event)
                 flagi.pauza = false;
             }
             if (flagi.pauza) {
-                Sleep(10);
+                sf::sleep(sf::milliseconds(10));
                 continue;
             }
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left) {
@@ -473,7 +505,7 @@ void griel(sf::Event event)
             WONSZ.draw(gr[e]);
         }
         WONSZ.display();
-        Sleep(10);
+        sf::sleep(sf::milliseconds(10));
     }
 
     WONSZ.clear(sf::Color(0, 0, 0));
@@ -620,16 +652,9 @@ void griel(sf::Event event)
 	sf::Sound tlo;
 	tlo.setBuffer(tlobuffer);
 
-    bool oddzielne;
-    ifstream tog_sep;
-    tog_sep.open("./Data/tog-sep.txt", ios::in);
-    if (tog_sep.good()) {
-        tog_sep >> oddzielne;
-        tog_sep.close();
-    }
-
     short raz[players];
-    int decimal = 10, sen = 0, sseenn = 0, kon = players;
+    int decimal = 10, sen = 0, kon = players;
+    char sseenn = '=';
     int wynik[players], score[players], dlugosc[players], d[players];
     string reszta = "", wyn[players];
     char c[players], stare[players];
@@ -649,13 +674,6 @@ void griel(sf::Event event)
         w_grze[l] = true;
     }
     poczatek(tab, mniam, mniamtext);
-    ifstream pliksen;
-    pliksen.open("./Data/sen.txt", ios::in);
-    if (pliksen.good()) {
-        pliksen >> sen;
-        pliksen.close();
-    }
-    sseenn=sen;
 
     do {
         while(WONSZ.pollEvent(event)) {
@@ -793,16 +811,16 @@ void griel(sf::Event event)
             }
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-                sseenn = sen/2;
+                sseenn = '/';
             } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-                sseenn = sen*2;
+                sseenn = '*';
             } else {
-                sseenn = sen;
+                sseenn = '=';
             }
         }
 
         if (c[0] == 'p' || flagi.pauza == true || not_moved(c)) {
-            Sleep(10);
+            sf::sleep(sf::milliseconds(10));
             continue;
         }
 
@@ -831,7 +849,7 @@ void griel(sf::Event event)
                     }
                 }
             }
-            if (koniec && oddzielne) {
+            if (koniec && opcje.oddzielne_zycia) {
                 w_grze[p] = false;
                 kon--;
                 koniec = false;
@@ -841,7 +859,7 @@ void griel(sf::Event event)
             koniec = true;
         }
 
-		if (flagi.dzwiek == true) {
+		if (opcje.dzwiek == true) {
             if (koniec == true) {
                 stuk.play();
             } else {
@@ -944,7 +962,29 @@ void griel(sf::Event event)
         }
         WONSZ.display();
 
-        Sleep(sseenn);
+        sf::Time czas = zegar.restart();
+        sf::Time czas_snu;
+        if (czas.asMilliseconds() < 17) {
+            czas_snu = sf::milliseconds(16 - czas.asMilliseconds());
+            czas_snu += sf::milliseconds((31 - opcje.szybkosc) * 50 / 3);
+        } else {
+            czas_snu = sf::milliseconds((31 - opcje.szybkosc) * 50 / 3);
+        }
+        switch (sseenn) {
+            case '*': {
+                czas_snu *= sf::Int64(2);
+                break;
+            }
+            case '/': {
+                czas_snu /= sf::Int64(2);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        cout << '[' << opcje.szybkosc << ']' << czas_snu.asMilliseconds() << "ms\n";
+        sf::sleep(czas_snu);
     } while (koniec != true);
 
     char spacja = 32;
@@ -1068,42 +1108,29 @@ void griel(sf::Event event)
     Sleep(150);
 }
 
-void szybwczyt(int &szybkosc, sf::String &szybk)
+void szybmanip(sf::String &szybk)
 {
-    szybkosc /= -10;
-    szybkosc += 30;
-    szybk = to_string(szybkosc);
+    if (opcje.szybkosc > 30) {
+        opcje.szybkosc = 1;
+    }
+    if (opcje.szybkosc < 1) {
+        opcje.szybkosc = 30;
+    }
+    szybk = to_string(opcje.szybkosc);
     if (szybk.getSize() == 1) {
-        szybk.insert(0, " ");
+        szybk.insert(0, "0");
     }
 }
 
-void szybmanip(int &szybkosc, sf::String &szybk)
+void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sound tlo)
 {
-    if (szybkosc > 30) {
-        szybkosc = 1;
-    }
-    if (szybkosc < 1) {
-        szybkosc = 30;
-    }
-    szybk = to_string(szybkosc);
-    if (szybk.getSize() == 1) {
-        szybk.insert(0, " ");
-    }
-}
+    sf::String szybk;
+    szybk = to_string(opcje.szybkosc);
 
-void szybwyp(int &szybkosc)
-{
-    szybkosc *= -10;
-    szybkosc += 300;
-}
-
-void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc, sf::Event event, sf::Sound tlo)
-{
-	sf::Texture opcje;
-    opcje.loadFromFile("./Data/opcje.png");
+	sf::Texture tekstura_opcje;
+    tekstura_opcje.loadFromFile("./Data/opcje.png");
     sf::Sprite opcjesprite;
-    opcjesprite.setTexture(opcje);
+    opcjesprite.setTexture(tekstura_opcje);
     opcjesprite.setPosition(48, 60);
 
     sf::Texture opcjerank;
@@ -1138,18 +1165,11 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
     sf::Sprite downsprite;
     downsprite.setTexture(down);
 
-    bool reset = false, opcje_koniec = false, oddzielne;
-
-    ifstream tog_sep;
-    tog_sep.open("./Data/tog-sep.txt", ios::in);
-    if (tog_sep.good()) {
-        tog_sep >> oddzielne;
-        tog_sep.close();
-    }
+    bool reset = false, opcje_koniec = false;
 
     string odd_stan;
 
-    if (oddzielne) {
+    if (opcje.oddzielne_zycia) {
         odd_stan = "TAK";
     } else {
         odd_stan = "NIE";
@@ -1176,8 +1196,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(upsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (134*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (140*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            flagi.dzwiek = !flagi.dzwiek;
-            if (flagi.dzwiek) {
+            opcje.dzwiek = !opcje.dzwiek;
+            if (opcje.dzwiek) {
                 dzwiek01 = "TAK";
             } else {
                 dzwiek01 = "NIE";
@@ -1193,8 +1213,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(upsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (182*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (188*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            szybkosc++;
-            szybmanip(szybkosc, szybk);
+            opcje.szybkosc++;
+            szybmanip(szybk);
             opcja2.setString(szybk);
             while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 continue;
@@ -1206,8 +1226,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(upsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (275*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (281*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            oddzielne =! oddzielne;
-            if (oddzielne) {
+            opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
+            if (opcje.oddzielne_zycia) {
                 odd_stan = "ODDZIELNE ZYCIA: TAK";
             } else {
                 odd_stan = "ODDZIELNE ZYCIA: NIE";
@@ -1224,8 +1244,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(downsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (160*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (168*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            flagi.dzwiek =! flagi.dzwiek;
-            if (flagi.dzwiek) {
+            opcje.dzwiek =! opcje.dzwiek;
+            if (opcje.dzwiek) {
                 dzwiek01 = "TAK";
             } else {
                 dzwiek01 = "NIE";
@@ -1242,8 +1262,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(downsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (208*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (214*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            szybkosc--;
-            szybmanip(szybkosc, szybk);
+            opcje.szybkosc--;
+            szybmanip(szybk);
             opcja2.setString(szybk);
             while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 continue;
@@ -1255,8 +1275,8 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
             WONSZ.draw(downsprite);
         }
         if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (304*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (310*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            oddzielne =! oddzielne;
-            if (oddzielne) {
+            opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
+            if (opcje.oddzielne_zycia) {
                 odd_stan = "ODDZIELNE ZYCIA: TAK";
             } else {
                 odd_stan = "ODDZIELNE ZYCIA: NIE";
@@ -1281,7 +1301,7 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
 
         while (WONSZ.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     tlo.stop();
                 }
                 flagi.koniec = true;
@@ -1317,36 +1337,15 @@ void opcje(sf::String &dzwiek01, sf::Font font, sf::String &szybk, int &szybkosc
         Sleep(10);
     }
 
-    szybwyp(szybkosc);
+    ofstream p_opcje("./Data/opcje.cfg", ios::out);
+    if (p_opcje.good()) {
+        p_opcje << "[BOOL]\n";
+        p_opcje << "dzwiek = " << opcje.dzwiek << '\n';
+        p_opcje << "oddzielne_zycia = " << opcje.oddzielne_zycia << '\n';
 
-    ofstream plikdzwiek2;
-    plikdzwiek2.open("./Data/sound.txt", ios::out);
-    if (plikdzwiek2.good()) {
-        if (flagi.dzwiek) {
-            plikdzwiek2 << '1';
-        } else {
-            plikdzwiek2<<'0';
-        }
-        plikdzwiek2.close();
+        p_opcje << "[INT]\n";
+        p_opcje << "szybkosc = " << opcje.szybkosc << '\n';
     }
-
-    ofstream plikszybkosc2;
-    plikszybkosc2.open("./Data/sen.txt", ios::out);
-    if(plikszybkosc2.good()) {
-        plikszybkosc2 << szybkosc;
-        plikszybkosc2 << ' ';
-        plikszybkosc2.close();
-    }
-
-    ofstream tog_sep2;
-    tog_sep2.open("./Data/tog-sep.txt", ios::out);
-    if(tog_sep2.good()) {
-        tog_sep2 << oddzielne;
-        tog_sep2 << ' ';
-        tog_sep2.close();
-    }
-
-    szybwczyt(szybkosc, szybk);
 }
 
 void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Texture &pomoctexture, sf::Event &introevent)
@@ -1379,13 +1378,13 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
 
     Sleep(1000);
 
-    if (flagi.dzwiek) {
+    if (opcje.dzwiek) {
         introsnd.play();
     }
     for (int xd = 0; xd < 35; xd++) {
         while(WONSZ.pollEvent(introevent)) {
             if (introevent.type == sf::Event::Closed) {
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     introsnd.stop();
                 }
                 flagi.koniec = true;
@@ -1685,7 +1684,7 @@ void ranking(sf::Event event, sf::Sound tlo)
         WONSZ.display();
         while(WONSZ.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     tlo.stop();
                 }
                 flagi.koniec = true;
@@ -1718,7 +1717,7 @@ void pomoc(sf::Event event, sf::Sprite pomocsprite, sf::Sound tlo)
         WONSZ.display();
         while(WONSZ.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     tlo.stop();
                 }
                 flagi.koniec = true;
@@ -1744,6 +1743,7 @@ void pomoc(sf::Event event, sf::Sprite pomocsprite, sf::Sound tlo)
 
 int main()
 {
+    WONSZ.setVerticalSyncEnabled(true);
     sf::Image wonsz_ico;
 	if (wonsz_ico.loadFromFile("./Data/icon.png")) {
         WONSZ.setIcon(64, 64, wonsz_ico.getPixelsPtr());
@@ -1756,15 +1756,14 @@ int main()
     sf::Event event;
 
 	sf::String dzwiek01;
-    ifstream plikdzwiek("./Data/sound.txt", ios::in);
-    if (plikdzwiek.good()) {
-        plikdzwiek >> flagi.dzwiek;
-        plikdzwiek.close();
+    ifstream p_opcje("./Data/opcje.cfg", ios::in);
+    if (p_opcje.good()) {
+        opcje_parser(p_opcje);
     } else {
         ;///error
     }
 
-    if (flagi.dzwiek) {
+    if (opcje.dzwiek) {
         dzwiek01 = "TAK";
     }
     else {
@@ -1814,23 +1813,13 @@ int main()
 	tlo.setBuffer(tlobuffer);
 	tlo.setLoop(true);
 
-    ifstream dev_file("dev", ios::in);
+    ifstream dev_file("./Data/dev", ios::in);
     if (dev_file.good()) {
         dev_file >> flagi.dev;
         dev_file.close();
     } else {
         flagi.dev = false;
     }
-
-    int szybkosc;
-    sf::String szybk;
-    ifstream plikszybkosc;
-    plikszybkosc.open("./Data/sen.txt", ios::in);
-    if(plikszybkosc.good() == true) {
-        plikszybkosc >> szybkosc;
-        plikszybkosc.close();
-    }
-    szybwczyt(szybkosc, szybk);
 
     int esc_lvl = 1;
     int place = 0;
@@ -1840,7 +1829,7 @@ int main()
         return 0;
     }
 
-    if (flagi.dzwiek) {
+    if (opcje.dzwiek) {
         tlo.play();
     }
 
@@ -1885,7 +1874,7 @@ int main()
         }
 
         if (esc_lvl == 0) {
-            if (flagi.dzwiek == true) {
+            if (opcje.dzwiek == true) {
                 tlo.stop();
             }
             WONSZ.close();
@@ -1943,7 +1932,7 @@ int main()
             }
             case 1: {
                 WONSZ.clear(sf::Color(0, 0, 0));
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     tlo.stop();
                 }
                 griel(event);
@@ -1952,7 +1941,7 @@ int main()
                     return 0;
                 }
                 esc_lvl--;
-                if (flagi.dzwiek) {
+                if (opcje.dzwiek) {
                     tlo.play();
                 }
                 break;
@@ -1969,7 +1958,7 @@ int main()
             }
             case 3: {
                 WONSZ.clear(sf::Color(0, 0, 0));
-                opcje(dzwiek01, font, szybk, szybkosc, event, tlo);
+                plansza_opcje(dzwiek01, font, event, tlo);
                 if (flagi.koniec) {
                     WONSZ.close();
                     return 0;
