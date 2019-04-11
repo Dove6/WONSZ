@@ -7,3 +7,4 @@ bin/Debug/*
 Data/dev
 *.depend
 *.layout
+*.cscope_file_list

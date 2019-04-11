@@ -42,30 +42,99 @@ int pix_h, pix_w;
 sf::Vector2u pix_s;
 short players;
 
-void opcje_parser(ifstream &p_opcje)
+void opcje_wczyt()
 {
-    string wiersz;
-    while (!p_opcje.eof()) {
-        getline(p_opcje, wiersz);
-        if (wiersz[0] != '[') {
-            size_t poz_spacja = wiersz.find(' ');
-            if (poz_spacja != string::npos) {
-                string nazwa_opcji = wiersz.substr(0, poz_spacja);
-                if (nazwa_opcji == "dzwiek") {
-                    if (wiersz.size() >= 10) {
-                        opcje.dzwiek = wiersz[9] - 48;
-                    }
-                } else if (nazwa_opcji == "oddzielne_zycia") {
-                    if (wiersz.size() >= 19) {
-                        opcje.oddzielne_zycia = wiersz[18] - 48;
-                    }
-                } else if (nazwa_opcji == "szybkosc") {
-                    if (wiersz.size() >= 12) {
-                        opcje.szybkosc = stoi(wiersz.substr(11));
+    ifstream p_opcje("./Data/opcje.cfg", ios::in);
+    if (p_opcje.good()) {
+        string wiersz;
+        while (!p_opcje.eof()) {
+            getline(p_opcje, wiersz);
+            if (wiersz[0] != '[') {
+                size_t poz_spacja = wiersz.find(' ');
+                if (poz_spacja != string::npos) {
+                    string nazwa_opcji = wiersz.substr(0, poz_spacja);
+                    if (nazwa_opcji == "dzwiek") {
+                        if (wiersz.size() >= 10) {
+                            opcje.dzwiek = wiersz[9] - 48;
+                        }
+                    } else if (nazwa_opcji == "oddzielne_zycia") {
+                        if (wiersz.size() >= 19) {
+                            opcje.oddzielne_zycia = wiersz[18] - 48;
+                        }
+                    } else if (nazwa_opcji == "szybkosc") {
+                        if (wiersz.size() >= 12) {
+                            opcje.szybkosc = stoi(wiersz.substr(11));
+                        }
                     }
                 }
             }
         }
+    } else {
+        cerr << "[file][r]Blad przy otwieraniu pliku opcji [Dane/opcje.cfg]\n";
+    }
+}
+
+void opcje_zapis()
+{
+    ofstream p_opcje("./Data/opcje.cfg", ios::out);
+    if (p_opcje.good()) {
+        p_opcje << "[BOOL]\n";
+        p_opcje << "dzwiek = " << opcje.dzwiek << '\n';
+        p_opcje << "oddzielne_zycia = " << opcje.oddzielne_zycia << '\n';
+
+        p_opcje << "[INT]\n";
+        p_opcje << "szybkosc = " << opcje.szybkosc << '\n';
+    } else {
+        cerr << "[file][w]Blad przy otwieraniu pliku opcji [Dane/opcje.cfg]\n";
+    }
+}
+
+void ranking_wczyt(vector<pair<int, string>> &ranking)
+{
+    ranking.resize(10);
+    ifstream p_ranking("./Data/ranking.arr", ios::in | ios::binary);
+    if (p_ranking.good()) {
+        for (int i = 0; i < 10; i++) {
+            p_ranking.read((char *)(&ranking[i].first), sizeof(int));
+            getline(p_ranking, ranking[i].second);
+        }
+        p_ranking.close();
+    } else {
+        p_ranking.open("./Data/ranking.txt", ios::in);
+        if (p_ranking.good()) {
+            for (int i = 0; i < 10; i++) {
+                p_ranking >> ranking[i].first;
+            }
+            for (int i = 0; i < 10; i++) {
+                p_ranking >> ranking[i].second;
+            }
+            p_ranking.close();
+        } else {
+            cerr << "[file][r]Blad przy otwieraniu plikow rankingu [Dane/ranking.arr; Dane/ranking.txt]\n";
+        }
+    }
+}
+
+void ranking_zapis(const vector<pair<int, string>> &ranking)
+{
+    ofstream p_ranking("./Data/ranking.arr", ios::out | ios::binary);
+    if (p_ranking.good()) {
+        for (int i = 0; i < 10; i++) {
+            p_ranking.write((char *)(&ranking[i].first), sizeof(int));
+            p_ranking << ranking[i].second << '\n';
+        }
+        p_ranking.close();
+    } else {
+        cerr << "[file][w]Blad przy otwieraniu pliku rankingu [Dane/ranking.arr]\n";
+    }
+}
+
+string zera_wiodace(const string &str, int maks_dlugosc)
+{
+    if (str.size() < maks_dlugosc) {
+        return (string(maks_dlugosc - str.size(), '0').append(str));
+    } else {
+        return str;
     }
 }
 
@@ -101,14 +170,14 @@ void poczatek(vector<vector<unsigned char>> &tab, unsigned char &mniam, sf::Text
 	WONSZ.display();
 }
 
-void rysuj_basic(sf::Text mniamtext, sf::Sprite grasprite)
+void rysuj_basic(sf::Text &mniamtext, sf::Sprite &grasprite)
 {
     WONSZ.clear(sf::Color(0, 0, 0));
 	WONSZ.draw(grasprite);
 	WONSZ.draw(mniamtext);
 }
 
-void rysuj_once(int dlugosc, sf::Sprite &headsprite, sf::Sprite &bellysprite, sf::Sprite &tailsprite, sf::Text wyniktext, vector<vector<unsigned char>> &poz)
+void rysuj_once(int dlugosc, sf::Sprite &headsprite, sf::Sprite &bellysprite, sf::Sprite &tailsprite, sf::Text &wyniktext, vector<vector<unsigned char>> &poz)
 {
 	WONSZ.draw(headsprite);
 	for (int i = 2; i < dlugosc; i++) {
@@ -287,8 +356,8 @@ void ruch(short &raz, unsigned char &pozx, unsigned char &pozy, vector<vector<un
         pozy = poz[0][1];
         tab[pozx][pozy] = 4;
         tailsprite.setPosition(pozx * 8, pozy * 12);
-        pozx=poz[dlugosc - 1][0];
-        pozy=poz[dlugosc - 1][1];
+        pozx = poz[dlugosc - 1][0];
+        pozy = poz[dlugosc - 1][1];
         tab[pozx][pozy] = 254;
         pozx += glpdX;
         pozy += glpdY;
@@ -308,23 +377,23 @@ void opposite(char &c, int stare)
     }
 }
 
-void rankingowanie(int hajskor[10], string nejm[10], int wynik, string nick)
+void rankingowanie(vector<pair<int, string>> &ranking, int wynik, string nick)
 {
-    if (hajskor[0] < 1) {
-        hajskor[0] = wynik;
-        nejm[0] = nick;
+    if (ranking[0].first < 1) {
+        ranking[0].first = wynik;
+        ranking[0].second = nick;
         return;
     }
     for (int i = 0; i < 10; i++) {
-        if (wynik > hajskor[i]) {
+        if (wynik > ranking[i].first) {
             for (int j = 0; j < 9 - i; j++) {
-                hajskor[9 - j] = hajskor[9 - j - 1];
+                ranking[9 - j].first = ranking[9 - j - 1].first;
             }
             for (int j = 0; j < 9 - i; j++) {
-                nejm[9 - j] = nejm[9 - j - 1];
+                ranking[9 - j].second = ranking[9 - j - 1].second;
             }
-            hajskor[i] = wynik;
-            nejm[i] = nick;
+            ranking[i].first = wynik;
+            ranking[i].second = nick;
             return;
         }
     }
@@ -866,11 +935,11 @@ void griel(sf::Event event)
             stare[p] = c[p];
         }
         for (int p = 0; p < players; p++) {
-            wynik[p] = dlugosc[p] - 3;
+            wynik[p] = (dlugosc[p] - 3) * opcje.szybkosc;
         }
         if (players > 1) {
             wynik[0] = wynik[1];
-            wynik[1] = dlugosc[0] - 3;
+            wynik[1] = (dlugosc[0] - 3) * opcje.szybkosc;
         }
         for (int p=0; p<players; p++) {
             score[p] = wynik[p];
@@ -973,7 +1042,9 @@ void griel(sf::Event event)
                 break;
             }
         }
+        /* debug *
         cout << '[' << opcje.szybkosc << ']' << czas_snu.asMilliseconds() << "ms\n";
+        /* */
         sf::sleep(czas_snu);
     } while (koniec != true);
 
@@ -1009,7 +1080,7 @@ void griel(sf::Event event)
                         flagi.pauza = false;
                     }
                     if (flagi.pauza) {
-                        Sleep(10);
+                        sf::sleep(sf::milliseconds(10));
                         continue;
                     }
                     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Right) {
@@ -1034,8 +1105,8 @@ void griel(sf::Event event)
                     }
                     if (backspc != true) {
                         if (event.type == sf::Event::TextEntered) {
-                            if (event.text.unicode < 128) {
-                                user += static_cast<char>(event.text.unicode);
+                            if (event.text.unicode < 128 && event.text.unicode > 31) {
+                                user += char(event.text.unicode);
                                 nicktext.setString(user);
                             }
                         }
@@ -1071,31 +1142,17 @@ void griel(sf::Event event)
                 WONSZ.draw(okr[p]);
                 WONSZ.draw(nicktext);
                 WONSZ.display();
-                Sleep(10);
+                sf::sleep(sf::milliseconds(10));
             }
             if (!rajt) {
-                plik.open("./Data/ranking.txt", ios::in | ios::out);
-                if (plik.good() == true) {
-                    for (int i = 0; i < 10; i++) {
-                        plik >> hajskor[i];
-                    }
-                    for (int i = 0; i < 10; i++) {
-                        plik >> nejm[i];
-                    }
-                    plik.seekg(0, ios_base::beg);
-                    rankingowanie(hajskor, nejm, wynik[p], user);
-                    for (int i = 0; i < 10; i++) {
-                        plik << hajskor[i] << (char)spacja;
-                    }
-                    for (int i = 0; i < 10; i++) {
-                        plik << nejm[i] << (char)spacja;
-                    }
-                    plik.close();
-                }
+                vector<pair<int, string>> ranking;
+                ranking_wczyt(ranking);
+                rankingowanie(ranking, wynik[p], user);
+                ranking_zapis(ranking);
             }
         }
     }
-    Sleep(150);
+    sf::sleep(sf::milliseconds(150));
 }
 
 void szybmanip(sf::String &szybk)
@@ -1106,10 +1163,7 @@ void szybmanip(sf::String &szybk)
     if (opcje.szybkosc < 1) {
         opcje.szybkosc = 30;
     }
-    szybk = to_string(opcje.szybkosc);
-    if (szybk.getSize() == 1) {
-        szybk.insert(0, "0");
-    }
+    szybk = zera_wiodace(to_string(opcje.szybkosc), 2);
 }
 
 void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sound tlo)
@@ -1304,14 +1358,17 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
                 flagi.pauza = false;
             }
             if (flagi.pauza) {
-                Sleep(10);
+                sf::sleep(sf::milliseconds(10));
                 continue;
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::T && reset) {
                 ofstream ranks;
-                ranks.open("./Data/ranking.txt", ios::out);
-                if(ranks.good()) {
-                    ranks << "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 null null null null null null null null null null                                                                                                    ";
+                ranks.open("./Data/ranking.arr", ios::out | ios::binary);
+                if (ranks.good()) {
+                    string wiersz = "\0\0\0\0\n";
+                    for (int i = 0; i < 10; i++) {
+                        ranks << wiersz;
+                    }
                     ranks.close();
                 }
                 reset = false;
@@ -1324,18 +1381,10 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
             }
         }
         WONSZ.display();
-        Sleep(10);
+        sf::sleep(sf::milliseconds(10));
     }
 
-    ofstream p_opcje("./Data/opcje.cfg", ios::out);
-    if (p_opcje.good()) {
-        p_opcje << "[BOOL]\n";
-        p_opcje << "dzwiek = " << opcje.dzwiek << '\n';
-        p_opcje << "oddzielne_zycia = " << opcje.oddzielne_zycia << '\n';
-
-        p_opcje << "[INT]\n";
-        p_opcje << "szybkosc = " << opcje.szybkosc << '\n';
-    }
+    opcje_zapis();
 }
 
 void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Texture &pomoctexture, sf::Event &introevent)
@@ -1366,7 +1415,7 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
     wonszintrosprite.setTexture(wonszintro);
     wonszintrosprite.setPosition(wonszintr, 132);
 
-    Sleep(1000);
+    sf::sleep(sf::milliseconds(1000));
 
     if (opcje.dzwiek) {
         introsnd.play();
@@ -1404,7 +1453,7 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
             }
         }
         if (flagi.pauza) {
-            Sleep(10);
+            sf::sleep(sf::milliseconds(10));
             xd--;
             continue;
         }
@@ -1414,13 +1463,13 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
         WONSZ.display();
         wonszintr += 8;
         wonszintrosprite.setPosition(wonszintr, 132);
-        Sleep(100);
+        sf::sleep(sf::milliseconds(100));
     }
     menu.loadFromFile("./Data/menu.png");
     font.loadFromFile("./Data/TerminalVector.ttf");
 	tlobuffer.loadFromFile("./Data/tlo.wav");
     pomoctexture.loadFromFile("./Data/pomoc.png");
-    Sleep(300);
+    sf::sleep(sf::milliseconds(300));
 }
 
 void ranking(sf::Event event, sf::Sound tlo)
@@ -1428,249 +1477,40 @@ void ranking(sf::Event event, sf::Sound tlo)
     sf::Font font;
     font.loadFromFile("./Data/TerminalVector.ttf");
 
-    sf::Texture ranking;
-    ranking.loadFromFile("./Data/ranking.png");
+    sf::Texture tekstura_ranking;
+    tekstura_ranking.loadFromFile("./Data/ranking.png");
     sf::Sprite rankingsprite;
-    rankingsprite.setTexture(ranking);
+    rankingsprite.setTexture(tekstura_ranking);
     rankingsprite.setPosition(178, 24);
 
-    int haj[10];
+    vector<pair<int, string>> ranking;
     string hajskor[10];
-    string nejm[10];
 
-    ifstream plik;
-    plik.open("./Data/ranking.txt", ios::in);
-    if (plik.good()) {
-        for (int i = 0; i < 10; i++) {
-            plik >> haj[i];
-        }
-        for (int i = 0; i < 10; i++) {
-            plik >> nejm[i];
-        }
-    }
-    plik.close();
+    ranking_wczyt(ranking);
 
-    int decimal = 10;
-    string reszta;
-
+    vector<sf::Text> lista(10);
     for (int i = 0; i < 10; i++) {
-        if (haj[i] == -1) {
-            hajskor[i] = "-1";
-            continue;
+        lista[i].setCharacterSize(12);
+        lista[i].setFont(font);
+        lista[i].setFillColor(sf::Color(255, 255, 255, 180));
+        if (ranking[i].first > 0) {
+            string wpis = to_string(i + 1) + ". " + ranking[i].second + " " + zera_wiodace(to_string(ranking[i].first), 5);
+            lista[i].setString(wpis);
+            lista[i].setPosition((292 - wpis.size() * 4), 132 + i * 24);
+        } else {
+            lista[i].setString(to_string(i + 1) + ". -----");
+            lista[i].setPosition(260 - (i == 9) * 4, 132 + i * 24);
         }
-        while (haj[i] != 0) {
-            switch ((haj[i] % decimal) / (decimal/10)) {
-                case 0: {
-                    reszta = "0";
-                    break;
-                }
-                case 1: {
-                    reszta = "1";
-                    break;
-                }
-                case 2: {
-                    reszta = "2";
-                    break;
-                }
-                case 3: {
-                    reszta = "3";
-                    break;
-                }
-                case 4: {
-                    reszta = "4";
-                    break;
-                }
-                case 5: {
-                    reszta = "5";
-                    break;
-                }
-                case 6: {
-                    reszta = "6";
-                    break;
-                }
-                case 7: {
-                    reszta = "7";
-                    break;
-                }
-                case 8: {
-                    reszta = "8";
-                    break;
-                }
-                case 9: {
-                    reszta = "9";
-                    break;
-                }
-            }
-            hajskor[i] = reszta + hajskor[i];
-            haj[i] -= (haj[i] % decimal);
-            decimal = decimal * 10;
-        }
-        if (decimal == 100) {
-            hajskor[i] = "0000" + hajskor[i];
-        }
-        if (decimal == 1000) {
-            hajskor[i] = "000" + hajskor[i];
-        }
-        if (decimal == 10000) {
-            hajskor[i] = "00" + hajskor[i];
-        }
-        if (decimal == 100000) {
-            hajskor[i] = "0" + hajskor[i];
-        }
-        decimal = 10;
     }
-
-    int lenght[10];
-    for (int i = 0; i < 10; i++) {
-        lenght[i] = (292 - (32 + (nejm[i].length() * 8) + hajskor[i].length() * 8) / 2);
-    }
-
-    sf::String frst;
-    if (hajskor[0] == "-1") {
-        frst = "1. -----";
-        lenght[0] = 260;
-    } else {
-        frst = "1. " + nejm[0] + " " + hajskor[0];
-    }
-
-    sf::Text first(frst, font);
-    first.setPosition(lenght[0], 132);
-    first.setCharacterSize(12);
-    first.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String scnd;
-    if (hajskor[1] == "-1") {
-        scnd = "2. -----";
-        lenght[1] = 260;
-    } else {
-        scnd = "2. " + nejm[1] + " " + hajskor[1];
-    }
-
-    sf::Text second(scnd, font);
-    second.setPosition(lenght[1], 156);
-    second.setCharacterSize(12);
-    second.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String thrd;
-    if (hajskor[2] == "-1") {
-        thrd = "3. -----";
-        lenght[2] = 260;
-    } else {
-        thrd = "3. " + nejm[2] + " " + hajskor[2];
-    }
-
-    sf::Text third(thrd, font);
-    third.setPosition(lenght[2], 180);
-    third.setCharacterSize(12);
-    third.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String frth;
-    if (hajskor[3] == "-1") {
-        frth = "4. -----";
-        lenght[3] = 260;
-    } else {
-        frth = "4. " + nejm[3] + " " + hajskor[3];
-    }
-
-    sf::Text fourth(frth, font);
-    fourth.setPosition(lenght[3], 204);
-    fourth.setCharacterSize(12);
-    fourth.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String ffth;
-    if (hajskor[4] == "-1") {
-        ffth = "5. -----";
-        lenght[4] = 260;
-    } else {
-        ffth = "5. " + nejm[4] + " " + hajskor[4];
-    }
-
-    sf::Text fifth(ffth, font);
-    fifth.setPosition(lenght[4], 228);
-    fifth.setCharacterSize(12);
-    fifth.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String sxth;
-    if (hajskor[5] == "-1") {
-        sxth = "6. -----";
-        lenght[5] = 260;
-    } else {
-        sxth = "6. " + nejm[5] + " " + hajskor[5];
-    }
-
-    sf::Text sixth(sxth, font);
-    sixth.setPosition(lenght[5], 252);
-    sixth.setCharacterSize(12);
-    sixth.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String svnth;
-    if (hajskor[6] == "-1") {
-        svnth = "6. -----";
-        lenght[6] = 260;
-    } else {
-        svnth = "7. " + nejm[6] + " " + hajskor[6];
-    }
-
-    sf::Text seventh(svnth, font);
-    seventh.setPosition(lenght[6], 276);
-    seventh.setCharacterSize(12);
-    seventh.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String ghth;
-    if (hajskor[7] == "-1") {
-        ghth = "8. -----";
-        lenght[7] = 260;
-    } else {
-        ghth = "8. " + nejm[7] + " " + hajskor[7];
-    }
-
-    sf::Text eighth(ghth, font);
-    eighth.setPosition(lenght[7], 300);
-    eighth.setCharacterSize(12);
-    eighth.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String nnth;
-    if (hajskor[8] == "-1") {
-        nnth = "9. -----";
-        lenght[8] = 260;
-    } else {
-        nnth = "9. " + nejm[8] + " " + hajskor[8];
-    }
-
-    sf::Text ninth(nnth, font);
-    ninth.setPosition(lenght[8], 324);
-    ninth.setCharacterSize(12);
-    ninth.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::String tnth;
-    if (hajskor[9] == "-1") {
-        tnth = "10. -----";
-        lenght[9] = 256;
-    } else {
-        tnth = "10. " + nejm[9] + " " + hajskor[9];
-        lenght[9]++;
-    }
-
-    sf::Text tenth(tnth, font);
-    tenth.setPosition(lenght[9], 348);
-    tenth.setCharacterSize(12);
-    tenth.setFillColor(sf::Color(255, 255, 255, 180));
 
     bool ranking_koniec = false;
 
     while (!ranking_koniec) {
         WONSZ.clear(sf::Color(0, 0, 0));
         WONSZ.draw(rankingsprite);
-        WONSZ.draw(first);
-        WONSZ.draw(second);
-        WONSZ.draw(third);
-        WONSZ.draw(fourth);
-        WONSZ.draw(fifth);
-        WONSZ.draw(sixth);
-        WONSZ.draw(seventh);
-        WONSZ.draw(eighth);
-        WONSZ.draw(ninth);
-        WONSZ.draw(tenth);
+        for (int i = 0; i < 10; i++) {
+            WONSZ.draw(lista[i]);
+        }
         WONSZ.display();
         while(WONSZ.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
@@ -1687,14 +1527,14 @@ void ranking(sf::Event event, sf::Sound tlo)
                 flagi.pauza = false;
             }
             if (flagi.pauza) {
-                Sleep(10);
+                sf::sleep(sf::milliseconds(10));
                 continue;
             }
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
                 ranking_koniec = true;
             }
         }
-        Sleep(10);
+        sf::sleep(sf::milliseconds(10));
     }
 }
 
@@ -1720,24 +1560,20 @@ void pomoc(sf::Event event, sf::Sprite pomocsprite, sf::Sound tlo)
                 flagi.pauza = false;
             }
             if (flagi.pauza) {
-                Sleep(10);
+                sf::sleep(sf::milliseconds(10));
                 continue;
             }
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
                 pomoc_koniec = true;
             }
         }
-        Sleep(10);
+        sf::sleep(sf::milliseconds(10));
     }
 }
 
 int main()
 {
     WONSZ.setVerticalSyncEnabled(true);
-    sf::Image wonsz_ico;
-	if (wonsz_ico.loadFromFile("./Data/icon.png")) {
-        WONSZ.setIcon(64, 64, wonsz_ico.getPixelsPtr());
-	}
 
     sf::Texture menu;
     sf::Font font;
@@ -1746,12 +1582,8 @@ int main()
     sf::Event event;
 
 	sf::String dzwiek01;
-    ifstream p_opcje("./Data/opcje.cfg", ios::in);
-    if (p_opcje.good()) {
-        opcje_parser(p_opcje);
-    } else {
-        ;///error
-    }
+
+	opcje_wczyt();
 
     if (opcje.dzwiek) {
         dzwiek01 = "TAK";
@@ -1874,7 +1706,7 @@ int main()
         }
 
         if (flagi.pauza) {
-            Sleep(10);
+            sf::sleep(sf::milliseconds(10));
             continue;
         }
 
@@ -1967,7 +1799,7 @@ int main()
                 break;
             }
         }
-        Sleep(10);
+        sf::sleep(sf::milliseconds(10));
     }
     return 0;
 }
