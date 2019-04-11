@@ -1,5 +1,8 @@
-obj/*
-bin/*
-nppBackup/*
+obj
+bin
+nppBackup
 test_env
 *.dll
+Data/dev
+*.depend
+*.layout
