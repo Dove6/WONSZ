@@ -156,6 +156,15 @@ string zera_wiodace(const string &str, int maks_dlugosc)
     }
 }
 
+wstring zera_wiodace(const wstring &str, int maks_dlugosc)
+{
+    if (str.size() < maks_dlugosc) {
+        return (wstring(maks_dlugosc - str.size(), '0').append(str));
+    } else {
+        return str;
+    }
+}
+
 void losu(vector<vector<unsigned char>> &tab, unsigned char &mniam, sf::Text &mniamtext)
 {
     unsigned char x, y;
@@ -389,7 +398,6 @@ void ruch(short &raz, unsigned char &pozx, unsigned char &pozy, vector<vector<un
 
 void opposite(char &c, int stare)
 {
-    cout << abs(c - stare) << '\n';
     if (abs(c - stare) == 2) {
         c = stare;
         return;
@@ -1076,7 +1084,7 @@ void griel(sf::Event event)
     sf::sleep(sf::milliseconds(150));
 }
 
-void szybmanip(sf::String &szybk)
+void szybmanip(wstring &szybk)
 {
     if (opcje.szybkosc > 30) {
         opcje.szybkosc = 1;
@@ -1084,172 +1092,153 @@ void szybmanip(sf::String &szybk)
     if (opcje.szybkosc < 1) {
         opcje.szybkosc = 30;
     }
-    szybk = zera_wiodace(to_string(opcje.szybkosc), 2);
+    szybk = zera_wiodace(to_wstring(opcje.szybkosc), 2);
 }
 
-void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sound tlo)
+void plansza_opcje(sf::Font font, sf::Event event, sf::Sound tlo)
 {
-    sf::String szybk;
-    szybk = to_string(opcje.szybkosc);
+    wstring szybk;
+    szybmanip(szybk);
 
-	sf::Texture tekstura_opcje;
-    tekstura_opcje.loadFromFile("./Data/opcje.png");
+	sf::Texture t_opcje;
+    t_opcje.loadFromFile("./Data/opcje.png");
     sf::Sprite opcjesprite;
-    opcjesprite.setTexture(tekstura_opcje);
+    opcjesprite.setTexture(t_opcje);
     opcjesprite.setPosition(208, 60);
 
-    sf::Texture opcjerank;
-    opcjerank.loadFromFile("./Data/opcjerank.png");
-    sf::Sprite opcjeranksprite;
-    opcjeranksprite.setTexture(opcjerank);
-    opcjeranksprite.setPosition(48, 60);
-
-    sf::Texture resettexture;
-    resettexture.loadFromFile("./Data/reset.png");
+    sf::Texture t_reset;
+    t_reset.loadFromFile("./Data/reset.png");
     sf::Sprite resetsprite;
-    resetsprite.setTexture(resettexture);
+    resetsprite.setTexture(t_reset);
     resetsprite.setPosition(96, 180);
 
-    sf::Text opcja1(dzwiek01, font);
-    opcja1.setPosition(248, 142);
-    opcja1.setCharacterSize(12);
-    opcja1.setFillColor(sf::Color(255, 255, 255, 180));
-    opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
+    sf::Texture t_strzalka_gora;
+    t_strzalka_gora.loadFromFile("./Data/strzalka_gora.png");
+    sf::Sprite strzalka_gora;
+    strzalka_gora.setTexture(t_strzalka_gora);
+    sf::Sprite strzalka_dol;
+    strzalka_dol.setTexture(t_strzalka_gora);
+    strzalka_dol.rotate(180);
 
-    sf::Text opcja2(szybk, font);
-    opcja2.setPosition(336, 190);
-    opcja2.setCharacterSize(12);
-    opcja2.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::Texture up0;
-    up0.loadFromFile("./Data/up.png");
-    sf::Sprite upsprite;
-    upsprite.setTexture(up0);
-
-    sf::Texture down;
-    down.loadFromFile("./Data/down.png");
-    sf::Sprite downsprite;
-    downsprite.setTexture(down);
-
-    bool reset = false, opcje_koniec = false;
-
-    string odd_stan;
-
-    if (opcje.oddzielne_zycia) {
-        odd_stan = "TAK";
-    } else {
-        odd_stan = "NIE";
+    vector<sf::Text> opcja(4);
+    opcja[0].setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
+    opcja[0].setPosition(248, 142);
+    opcja[1].setString(wstring(L"SZYBKOŚĆ WĘŻA: ") + szybk);
+    opcja[1].setPosition(216, 190);
+    opcja[2].setString(L"RESET WYNIKÓW");
+    opcja[2].setPosition(240, 238);
+    opcja[3].setString(wstring(L"ODDZIELNE ZYCIA: ") + wstring(opcje.oddzielne_zycia ? L"TAK" : L"NIE"));
+    opcja[3].setPosition(205, 286);
+    for (int i = 0; i < 4; i++) {
+        opcja[i].setFont(font);
+        opcja[i].setCharacterSize(12);
+        opcja[i].setFillColor(sf::Color(255, 255, 255, 180));
     }
 
-    sf::Text opcja3("ODDZIELNE ZYCIA: " + odd_stan, font);
-    opcja3.setPosition(205, 286);
-    opcja3.setCharacterSize(12);
-    opcja3.setFillColor(sf::Color(255, 255, 255, 180));
+    bool reset = false, opcje_koniec = false;
 
 	while (!opcje_koniec) {
         WONSZ.clear(sf::Color(0, 0, 0));
         WONSZ.draw(opcjesprite);
-        WONSZ.draw(opcja1);
-        WONSZ.draw(opcja2);
-        WONSZ.draw(opcja3);
-        upsprite.setPosition(312, 134);
-        WONSZ.draw(upsprite);
+        for (int i = 0; i < 4; i++) {
+            WONSZ.draw(opcja[i]);
+        }
         pix_s = WONSZ.getSize();
         pix_w = pix_s.x;
         pix_h = pix_s.y;
 
-        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (134 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (140 * pix_h / 416)) {
-            WONSZ.draw(upsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (134 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (140 * pix_h / 416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.dzwiek = !opcje.dzwiek;
-            opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
+        strzalka_gora.setPosition(312, 134);
+        WONSZ.draw(strzalka_gora);
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (130 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (140 * pix_h / 416)) {
+            WONSZ.draw(strzalka_gora);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.dzwiek = !opcje.dzwiek;
+                opcja[0].setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
         }
-        upsprite.setPosition(332, 182);
-        WONSZ.draw(upsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (182*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (188*pix_h/416)) {
-            WONSZ.draw(upsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (182*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (188*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.szybkosc++;
-            szybmanip(szybk);
-            opcja2.setString(szybk);
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
+        strzalka_gora.setPosition(332, 182);
+        WONSZ.draw(strzalka_gora);
+        if (sf::Mouse::getPosition(WONSZ).x > (332 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (355 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (176 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (186 * pix_h / 416)) {
+            WONSZ.draw(strzalka_gora);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.szybkosc++;
+                szybmanip(szybk);
+                opcja[1].setString(wstring(L"SZYBKOŚĆ WĘŻA: ") + szybk);
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
         }
-        upsprite.setPosition(341, 278);
-        WONSZ.draw(upsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (275*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (281*pix_h/416)) {
-            WONSZ.draw(upsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (275*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (281*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
-            if (opcje.oddzielne_zycia) {
-                odd_stan = "ODDZIELNE ZYCIA: TAK";
-            } else {
-                odd_stan = "ODDZIELNE ZYCIA: NIE";
+        strzalka_gora.setPosition(341, 278);
+        WONSZ.draw(strzalka_gora);
+        if (sf::Mouse::getPosition(WONSZ).x > (341 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (364 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (270 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (280 * pix_h / 416)) {
+            WONSZ.draw(strzalka_gora);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
+                opcja[3].setString(wstring(L"ODDZIELNE ŻYCIA: ") + wstring(opcje.oddzielne_zycia ? L"TAK" : L"NIE"));
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
-            opcja3.setString(odd_stan);
+        }
+        strzalka_dol.setPosition(335, 165);
+        WONSZ.draw(strzalka_dol);
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (154 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (164 * pix_h / 416)) {
+            WONSZ.draw(strzalka_dol);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.dzwiek =! opcje.dzwiek;
+                opcja[0].setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
 
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
         }
-        downsprite.setPosition(312, 160);
-        WONSZ.draw(downsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (160 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (168 * pix_h / 416)) {
-            WONSZ.draw(downsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (160 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (168 * pix_h / 416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.dzwiek =! opcje.dzwiek;
-            opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
-
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
+        strzalka_dol.setPosition(355, 213);
+        WONSZ.draw(strzalka_dol);
+        if (sf::Mouse::getPosition(WONSZ).x > (332 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (355 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (202 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (212 * pix_h / 416)) {
+            WONSZ.draw(strzalka_dol);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.szybkosc--;
+                szybmanip(szybk);
+                opcja[1].setString(wstring(L"SZYBKOŚĆ WĘŻA: ") + szybk);
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
         }
-        downsprite.setPosition(332, 208);
-        WONSZ.draw(downsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (208*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (214*pix_h/416)) {
-            WONSZ.draw(downsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (332*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (355*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (208*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (214*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.szybkosc--;
-            szybmanip(szybk);
-            opcja2.setString(szybk);
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
+        strzalka_dol.setPosition(364, 309);
+        WONSZ.draw(strzalka_dol);
+        if (sf::Mouse::getPosition(WONSZ).x > (341 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (364 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (296 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (306 * pix_h / 416)) {
+            WONSZ.draw(strzalka_dol);
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
+                opcja[3].setString(wstring(L"ODDZIELNE ŻYCIA: ") + wstring(opcje.oddzielne_zycia ? L"TAK" : L"NIE"));
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
         }
-        downsprite.setPosition(341, 304);
-        WONSZ.draw(downsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (304*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (310*pix_h/416)) {
-            WONSZ.draw(downsprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (341*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (364*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (304*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (310*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            opcje.oddzielne_zycia =! opcje.oddzielne_zycia;
-            if (opcje.oddzielne_zycia) {
-                odd_stan = "ODDZIELNE ZYCIA: TAK";
-            } else {
-                odd_stan = "ODDZIELNE ZYCIA: NIE";
+        if (sf::Mouse::getPosition(WONSZ).x > (230 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (336 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (232 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (250 * pix_h / 416)) {
+            opcja[2].setFillColor(sf::Color(255, 255, 255, 255));
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                reset = true;
+                while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    sf::sleep(sf::milliseconds(10));
+                    continue;
+                }
             }
-            opcja3.setString(odd_stan);
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
-            }
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (230*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (336*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (236*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (252*pix_h/416)) {
-            WONSZ.draw(opcjeranksprite);
-        }
-        if (sf::Mouse::getPosition(WONSZ).x > (230*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (336*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (236*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (252*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            reset = true;
-            while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                continue;
-            }
+        } else {
+            opcja[2].setFillColor(sf::Color(255, 255, 255, 180));
         }
         if (reset) {
             WONSZ.draw(resetsprite);
@@ -1301,8 +1290,6 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
 
 void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Texture &pomoctexture, sf::Event &introevent)
 {
-    int wonszintr = 128;
-
     sf::SoundBuffer introbuffer;
 	introbuffer.loadFromFile("./Data/intro.wav");
 	sf::Sound introsnd;
@@ -1312,27 +1299,25 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
     intro.loadFromFile("./Data/intro.png");
     sf::Sprite introsprite;
     introsprite.setTexture(intro);
-    introsprite.setPosition(72, 132);
+    introsprite.setPosition(72, 155);
 
-    sf::Texture wonszintro;
-    sf::Sprite wonszintrosprite;
+    sf::Texture t_wonszintro1, t_wonszintro2;
+    sf::Sprite wonszintrosprite1, wonszintrosprite2;
 
     WONSZ.clear(sf::Color(0, 0, 0));
     WONSZ.draw(introsprite);
     WONSZ.display();
 
-    intro.loadFromFile("./Data/intro2.png");
-    introsprite.setTexture(intro);
-    wonszintro.loadFromFile("./Data/introwonsz.png");
-    wonszintrosprite.setTexture(wonszintro);
-    wonszintrosprite.setPosition(wonszintr, 132);
+    int wonszintr = 128;
 
-    sf::sleep(sf::milliseconds(1000));
+    t_wonszintro1.loadFromFile("./Data/introwonsz1.png");
+    wonszintrosprite1.setTexture(t_wonszintro1);
+    wonszintrosprite1.setPosition(136, 132);
+    t_wonszintro2.loadFromFile("./Data/introwonsz2.png");
+    wonszintrosprite2.setTexture(t_wonszintro2);
+    wonszintrosprite2.setPosition(wonszintr, 132);
 
-    if (opcje.dzwiek) {
-        introsnd.play();
-    }
-    for (int xd = 0; xd < 35; xd++) {
+    for (int xd = -10; xd < 35; xd++) {
         while(WONSZ.pollEvent(introevent)) {
             if (introevent.type == sf::Event::Closed) {
                 if (opcje.dzwiek) {
@@ -1371,12 +1356,21 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
             xd--;
             continue;
         }
+        if (xd == 0) {
+            if (opcje.dzwiek) {
+                introsnd.play();
+            }
+        }
         WONSZ.clear(sf::Color(0, 0, 0));
         WONSZ.draw(introsprite);
-        WONSZ.draw(wonszintrosprite);
+        if (xd >= 0) {
+            WONSZ.draw(wonszintrosprite2);
+            wonszintr += 8;
+            wonszintrosprite2.setPosition(wonszintr, 132);
+        } else {
+            WONSZ.draw(wonszintrosprite1);
+        }
         WONSZ.display();
-        wonszintr += 8;
-        wonszintrosprite.setPosition(wonszintr, 132);
         sf::sleep(sf::milliseconds(100));
     }
     menu.loadFromFile("./Data/menu.png");
@@ -1495,16 +1489,7 @@ int main()
     sf::Texture pomoctexture;
     sf::Event event;
 
-	sf::String dzwiek01;
-
 	opcje_wczyt();
-
-    if (opcje.dzwiek) {
-        dzwiek01 = "TAK";
-    }
-    else {
-        dzwiek01 = "NIE";
-    }
 
                                                             ///INTRO
 
@@ -1687,7 +1672,7 @@ int main()
             }
             case 3: {
                 WONSZ.clear(sf::Color(0, 0, 0));
-                plansza_opcje(dzwiek01, font, event, tlo);
+                plansza_opcje(font, event, tlo);
                 if (flagi.koniec) {
                     WONSZ.close();
                     return 0;
