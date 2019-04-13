@@ -22,11 +22,29 @@ struct {
          pauza,
          koniec;
 } flagi = {false, false, false};
+
 struct {
     bool dzwiek,
          oddzielne_zycia;
     int szybkosc;
 } opcje = {true, true, 15};
+
+sf::Keyboard::Key sterowanie[6][4] = {
+    {sf::Keyboard::Up,      sf::Keyboard::Left,    sf::Keyboard::Down,    sf::Keyboard::Right},
+    {sf::Keyboard::W,       sf::Keyboard::A,       sf::Keyboard::S,       sf::Keyboard::D},
+    {sf::Keyboard::T,       sf::Keyboard::F,       sf::Keyboard::G,       sf::Keyboard::H},
+    {sf::Keyboard::I,       sf::Keyboard::J,       sf::Keyboard::K,       sf::Keyboard::L},
+    {sf::Keyboard::Home,    sf::Keyboard::Delete,  sf::Keyboard::End,     sf::Keyboard::PageDown},
+    {sf::Keyboard::Numpad8, sf::Keyboard::Numpad4, sf::Keyboard::Numpad5, sf::Keyboard::Numpad6}
+};
+
+enum kierunek {
+    gora = 0,
+    lewo = 1,
+    dol = 2,
+    prawo = 3
+};
+
 unsigned short plansza = 0;
 sf::Clock zegar;
 
@@ -371,7 +389,8 @@ void ruch(short &raz, unsigned char &pozx, unsigned char &pozy, vector<vector<un
 
 void opposite(char &c, int stare)
 {
-    if (c == -stare) {
+    cout << abs(c - stare) << '\n';
+    if (abs(c - stare) == 2) {
         c = stare;
         return;
     }
@@ -751,122 +770,24 @@ void griel(sf::Event event)
                 break;
             }
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up) {
-                c[0] = -2;
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Left) {
-                c[0] = -1;
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Right) {
-                c[0] = 1;
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Down) {
-                c[0] = 2;
-            }
-
-            if (players > 1) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W) {
-                    c[1] = -2;
+            if (event.type == sf::Event::KeyPressed) {
+                for (int i = 0; i < players; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        if (event.key.code == sterowanie[i][j]) {
+                            c[i] = j;
+                        }
+                    }
                 }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A) {
-                    c[1] = -1;
+                if (event.key.code == sf::Keyboard::P) {
+                    c[0] = 'p';
                 }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D) {
-                    c[1] = 1;
+                if (event.key.code == sf::Keyboard::F2 && flagi.dev) {
+                    d[0] += 10;
                 }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S) {
-                    c[1] = 2;
-                }
-            }
-
-            if (players > 2) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::T) {
-                    c[2] = -2;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F) {
-                    c[2] = -1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::H) {
-                    c[2] = 1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
-                    c[2] = 2;
-                }
-            }
-
-            if (players>3) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::I) {
-                    c[3] = -2;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::J) {
-                    c[3] = -1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::L) {
-                    c[3] = 1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K) {
-                    c[3] = 2;
-                }
-            }
-
-            if (players>4) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Home) {
-                    c[4] = -2;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete) {
-                    c[4] = -1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::PageDown) {
-                    c[4] = 1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::End) {
-                    c[4] = 2;
-                }
-            }
-
-            if (players>5) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad8) {
-                    c[5] = -2;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad4) {
-                    c[5] = -1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad6) {
-                    c[5] = 1;
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Numpad5) {
-                    c[5] = 2;
-                }
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P) {
-                c[0] = 'p';
             }
 
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
-                koniec=true;
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F2 && flagi.dev == true) {
-                d[0] = 0;
+                koniec = true;
             }
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
@@ -887,20 +808,20 @@ void griel(sf::Event event)
             opposite(c[p], stare[p]);
             if (w_grze[p]) {
                 switch (c[p]) {
-                    case -2: {
+                    case kierunek::gora: {
                         ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 0, -1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
                     }
-                    case -1: {
+                    case kierunek::lewo: {
                         ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, -1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
                     }
-                    case 1: {
-                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+                    case kierunek::dol: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 0, 1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
                     }
-                    case 2: {
-                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 0, 1, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
+                    case kierunek::prawo: {
+                        ruch(raz[p], pozx, pozy, tab, koniec, mniam, d[p], dlugosc[p], poz[p], zjadl, 1, 0, headsprite[p], bellysprite[p], tailsprite[p], mniamtext, p);
                         break;
                     }
                     default: {
@@ -1091,7 +1012,7 @@ void griel(sf::Event event)
                     }
                     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace) {
                         if (user.length() > 0) {
-                            user.erase(user.end()-1);
+                            user.erase(user.end() - 1);
                             nicktext.setString(user);
                             backspc = true;
                         } else {
@@ -1175,7 +1096,7 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
     tekstura_opcje.loadFromFile("./Data/opcje.png");
     sf::Sprite opcjesprite;
     opcjesprite.setTexture(tekstura_opcje);
-    opcjesprite.setPosition(48, 60);
+    opcjesprite.setPosition(208, 60);
 
     sf::Texture opcjerank;
     opcjerank.loadFromFile("./Data/opcjerank.png");
@@ -1190,9 +1111,10 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
     resetsprite.setPosition(96, 180);
 
     sf::Text opcja1(dzwiek01, font);
-    opcja1.setPosition(112, 142);
+    opcja1.setPosition(248, 142);
     opcja1.setCharacterSize(12);
     opcja1.setFillColor(sf::Color(255, 255, 255, 180));
+    opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
 
     sf::Text opcja2(szybk, font);
     opcja2.setPosition(336, 190);
@@ -1230,23 +1152,18 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
         WONSZ.draw(opcja1);
         WONSZ.draw(opcja2);
         WONSZ.draw(opcja3);
-        upsprite.setPosition(112, 134);
+        upsprite.setPosition(312, 134);
         WONSZ.draw(upsprite);
         pix_s = WONSZ.getSize();
         pix_w = pix_s.x;
         pix_h = pix_s.y;
 
-        if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (134*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (140*pix_h/416)) {
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (134 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (140 * pix_h / 416)) {
             WONSZ.draw(upsprite);
         }
-        if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (134*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (140*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (134 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (140 * pix_h / 416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
             opcje.dzwiek = !opcje.dzwiek;
-            if (opcje.dzwiek) {
-                dzwiek01 = "TAK";
-            } else {
-                dzwiek01 = "NIE";
-            }
-            opcja1.setString(dzwiek01);
+            opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
             while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 continue;
             }
@@ -1282,19 +1199,14 @@ void plansza_opcje(sf::String &dzwiek01, sf::Font font, sf::Event event, sf::Sou
                 continue;
             }
         }
-        downsprite.setPosition(112, 160);
+        downsprite.setPosition(312, 160);
         WONSZ.draw(downsprite);
-        if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (160*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (168*pix_h/416)) {
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (160 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (168 * pix_h / 416)) {
             WONSZ.draw(downsprite);
         }
-        if (sf::Mouse::getPosition(WONSZ).x > (112*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (135*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (160*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (168*pix_h/416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        if (sf::Mouse::getPosition(WONSZ).x > (312 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).x < (335 * pix_w / 584) && sf::Mouse::getPosition(WONSZ).y > (160 * pix_h / 416) && sf::Mouse::getPosition(WONSZ).y < (168 * pix_h / 416) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
             opcje.dzwiek =! opcje.dzwiek;
-            if (opcje.dzwiek) {
-                dzwiek01 = "TAK";
-            } else {
-                dzwiek01 = "NIE";
-            }
-            opcja1.setString(dzwiek01);
+            opcja1.setString(wstring(L"DŹWIĘK: ") + wstring(opcje.dzwiek ? L"TAK" : L"NIE"));
 
             while (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 continue;
@@ -1449,7 +1361,9 @@ void intro(sf::Texture &menu, sf::Font &font, sf::SoundBuffer &tlobuffer, sf::Te
             }
             if (introevent.type == sf::Event::GainedFocus) {
                 flagi.pauza = false;
-                introsnd.play();
+                if (opcje.dzwiek) {
+                    introsnd.play();
+                }
             }
         }
         if (flagi.pauza) {
@@ -1606,30 +1520,22 @@ int main()
     pomocsprite.setPosition(40, 36);
 
 
-    sf::Text przycisk1("GRA", font);
-    przycisk1.setPosition(280, 190);
-    przycisk1.setCharacterSize(12);
-    przycisk1.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::Text przycisk2("RANKING", font);
-    przycisk2.setPosition(264, 226);
-    przycisk2.setCharacterSize(12);
-    przycisk2.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::Text przycisk3("OPCJE", font);
-    przycisk3.setPosition(272, 262);
-    przycisk3.setCharacterSize(12);
-    przycisk3.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::Text przycisk4("POMOC", font);
-    przycisk4.setPosition(272, 298);
-    przycisk4.setCharacterSize(12);
-    przycisk4.setFillColor(sf::Color(255, 255, 255, 180));
-
-    sf::Text przycisk5(L"WYJŚCIE", font);
-    przycisk5.setPosition(264, 334);
-    przycisk5.setCharacterSize(12);
-    przycisk5.setFillColor(sf::Color(255, 255, 255, 180));
+    vector<sf::Text> przycisk(5);
+    przycisk[0].setString("GRA");
+    przycisk[0].setPosition(280, 190);
+    przycisk[1].setString("RANKING");
+    przycisk[1].setPosition(264, 226);
+    przycisk[2].setString("OPCJE");
+    przycisk[2].setPosition(272, 262);
+    przycisk[3].setString("POMOC");
+    przycisk[3].setPosition(272, 298);
+    przycisk[4].setString(L"WYJŚCIE");
+    przycisk[4].setPosition(264, 334);
+    for (int i = 0; i < 5; i++) {
+        przycisk[i].setFont(font);
+        przycisk[i].setCharacterSize(12);
+        przycisk[i].setFillColor(sf::Color(255, 255, 255, 180));
+    }
 
 	sf::Sound tlo;
 	tlo.setBuffer(tlobuffer);
@@ -1639,6 +1545,7 @@ int main()
     if (dev_file.good()) {
         dev_file >> flagi.dev;
         dev_file.close();
+        cout << "Developer mode!\n";
     } else {
         flagi.dev = false;
     }
@@ -1669,7 +1576,9 @@ int main()
             }
             if (event.type == sf::Event::GainedFocus) {
                 flagi.pauza = false;
-                tlo.play();
+                if (opcje.dzwiek) {
+                    tlo.play();
+                }
             }
 
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left) {
@@ -1713,42 +1622,40 @@ int main()
         switch (place) {
             case 0: {
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (180*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (210*pix_h/416)) {
-                    przycisk1.setFillColor(sf::Color(255, 255, 255));
+                    przycisk[0].setFillColor(sf::Color(255, 255, 255));
                 } else {
-                    przycisk1.setFillColor(sf::Color(255, 255, 255, 180));
+                    przycisk[0].setFillColor(sf::Color(255, 255, 255, 180));
                 }
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (215*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (245*pix_h/416)) {
-                    przycisk2.setFillColor(sf::Color(255, 255, 255));
+                    przycisk[1].setFillColor(sf::Color(255, 255, 255));
                 } else {
-                    przycisk2.setFillColor(sf::Color(255, 255, 255, 180));
+                    przycisk[1].setFillColor(sf::Color(255, 255, 255, 180));
                 }
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (255*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (285*pix_h/416)) {
-                    przycisk3.setFillColor(sf::Color(255, 255, 255));
+                    przycisk[2].setFillColor(sf::Color(255, 255, 255));
                 } else {
-                    przycisk3.setFillColor(sf::Color(255, 255, 255, 180));
+                    przycisk[2].setFillColor(sf::Color(255, 255, 255, 180));
                 }
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (290*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (320*pix_h/416)) {
-                    przycisk4.setFillColor(sf::Color(255, 255, 255));
+                    przycisk[3].setFillColor(sf::Color(255, 255, 255));
                 } else {
-                    przycisk4.setFillColor(sf::Color(255, 255, 255, 180));
+                    przycisk[3].setFillColor(sf::Color(255, 255, 255, 180));
                 }
 
                 if (sf::Mouse::getPosition(WONSZ).x > (250*pix_w/584) && sf::Mouse::getPosition(WONSZ).x < (330*pix_w/584) && sf::Mouse::getPosition(WONSZ).y > (325*pix_h/416) && sf::Mouse::getPosition(WONSZ).y < (355*pix_h/416)) {
-                    przycisk5.setFillColor(sf::Color(255, 255, 255));
+                    przycisk[4].setFillColor(sf::Color(255, 255, 255));
                 } else {
-                    przycisk5.setFillColor(sf::Color(255, 255, 255, 180));
+                    przycisk[4].setFillColor(sf::Color(255, 255, 255, 180));
                 }
 
                 WONSZ.clear(sf::Color(0, 0, 0));
                 WONSZ.draw(menusprite);
-                WONSZ.draw(przycisk1);
-                WONSZ.draw(przycisk2);
-                WONSZ.draw(przycisk3);
-                WONSZ.draw(przycisk4);
-                WONSZ.draw(przycisk5);
+                for (int i = 0; i < 5; i++) {
+                    WONSZ.draw(przycisk[i]);
+                }
                 WONSZ.display();
                 break;
             }
@@ -1784,6 +1691,12 @@ int main()
                 if (flagi.koniec) {
                     WONSZ.close();
                     return 0;
+                }
+                tlo.pause();
+                if (opcje.dzwiek) {
+                    tlo.play();
+                } else {
+                    tlo.stop();
                 }
                 esc_lvl--;
                 break;
